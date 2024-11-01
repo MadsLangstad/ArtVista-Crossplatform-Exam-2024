@@ -1,70 +1,271 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Text, View } from "react-native";
+import React, { memo } from "react";
+import { FlatList, Image, TouchableOpacity } from "react-native";
+import { router } from "expo-router";
+import { ArtworkItemProps } from "@/types/galleryTypes";
+import { ArtworkItemComponentProps } from "@/types/galleryTypes";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+// Test data
+const artworks = [
+  {
+    id: "1",
+    title: "Artwork 1",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 1",
+  },
+  {
+    id: "2",
+    title: "Artwork 2",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 2",
+  },
+  {
+    id: "3",
+    title: "Artwork 3",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 3",
+  },
+  {
+    id: "4",
+    title: "Artwork 4",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 4",
+  },
+  {
+    id: "5",
+    title: "Artwork 5",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 5",
+  },
+  {
+    id: "6",
+    title: "Artwork 6",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 6",
+  },
+  {
+    id: "7",
+    title: "Artwork 7",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 7",
+  },
+  {
+    id: "8",
+    title: "Artwork 8",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 8",
+  },
+  {
+    id: "9",
+    title: "Artwork 9",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 9",
+  },
+  {
+    id: "10",
+    title: "Artwork 10",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 10",
+  },
+  {
+    id: "11",
+    title: "Artwork 11",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 11",
+  },
+  {
+    id: "12",
+    title: "Artwork 12",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 12",
+  },
+  {
+    id: "13",
+    title: "Artwork 13",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 13",
+  },
+  {
+    id: "14",
+    title: "Artwork 14",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 14",
+  },
+  {
+    id: "15",
+    title: "Artwork 15",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 15",
+  },
+  {
+    id: "16",
+    title: "Artwork 16",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 16",
+  },
+  {
+    id: "17",
+    title: "Artwork 17",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 17",
+  },
+  {
+    id: "18",
+    title: "Artwork 18",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 18",
+  },
+  {
+    id: "19",
+    title: "Artwork 19",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 19",
+  },
+  {
+    id: "20",
+    title: "Artwork 20",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 20",
+  },
+  {
+    id: "21",
+    title: "Artwork 21",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 21",
+  },
+  {
+    id: "22",
+    title: "Artwork 22",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 22",
+  },
+  {
+    id: "23",
+    title: "Artwork 23",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 23",
+  },
+  {
+    id: "24",
+    title: "Artwork 24",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 24",
+  },
+  {
+    id: "25",
+    title: "Artwork 25",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 25",
+  },
+  {
+    id: "26",
+    title: "Artwork 26",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 26",
+  },
+  {
+    id: "27",
+    title: "Artwork 27",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 27",
+  },
+  {
+    id: "28",
+    title: "Artwork 28",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 28",
+  },
+  {
+    id: "29",
+    title: "Artwork 29",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 29",
+  },
+  {
+    id: "30",
+    title: "Artwork 30",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHe0MpcScrdxPwjT_aL06_aCYrDv1l3_GAUg&s",
+    abstract: "Abstract 30",
+  },
+];
 
-export default function HomeScreen() {
+const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => (
+  <TouchableOpacity
+    onPress={() => handlePress(item)}
+    className="p-4 mb-4 rounded-lg bg-slate-200 dark:bg-black w-full"
+  >
+    <View className="w-full h-40 bg-slate-100 dark:bg-black rounded-lg overflow-hidden mb-2">
+      <Image
+        source={{ uri: item.image }}
+        className="w-full h-full"
+        resizeMode="cover"
+      />
+    </View>
+    <View className="flex flex-row justify-between">
+      <Text className="dark:text-white font-bold">Title: {item.title}</Text>
+      <Text className="dark:text-gray-400">Abstract: {item.abstract}</Text>
+    </View>
+  </TouchableOpacity>
+));
+
+export default function Gallery() {
+  const handleArtworkPress = (artwork: { id: any }) => {
+    router.push(`/(artwork)/detail?id=${artwork.id}`);
+  };
+
+  const renderItem = ({ item }: { item: ArtworkItemProps }) => (
+    <ArtworkItem item={item} handlePress={handleArtworkPress} />
+  );
+  const ITEM_HEIGHT = 200;
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View className="flex-1 bg-white dark:bg-black p-4">
+      <FlatList
+        data={artworks}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        numColumns={1}
+        showsVerticalScrollIndicator={false}
+        getItemLayout={(data, index) => ({
+          length: ITEM_HEIGHT,
+          offset: ITEM_HEIGHT * index,
+          index,
+        })}
+        initialNumToRender={10}
+        windowSize={5}
+        className="w-full"
+        contentContainerStyle={{ paddingBottom: 16 }}
+      />
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
