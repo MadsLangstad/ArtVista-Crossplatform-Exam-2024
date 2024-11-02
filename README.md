@@ -1,50 +1,102 @@
-# Welcome to your Expo app 👋
+# ArtVista
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**ArtVista** is a digital art gallery application developed for the TDS200 Crossplatform course. The app allows artists to upload their artwork, and art enthusiasts to explore, interact, and engage with the art community. It is built with React Native using Expo, NativeWind for styling, Firebase for backend services, and TypeScript for type safety.
 
-## Get started
+---
 
-1. Install dependencies
+## Table of Contents
 
+- [Installation](#installation)
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Setup](#setup)
+- [Usage](#usage)
+- [Future Improvements](#future-improvements)
+- [Author](#author)
+
+---
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/ArtVista.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd ArtVista
+   ```
+3. Install dependencies:
    ```bash
    npm install
    ```
-
-2. Start the app
-
+4. Start the Expo development server:
    ```bash
-    npx expo start
+   npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Features
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- **Artwork Viewing**: Browse artworks in list or grid formats with detailed views.
+- **Artist Uploads**: Securely upload artwork with images, descriptions, and hashtags.
+- **Authentication**: User registration and login using Firebase, with support for social logins.
+- **Navigation**: Seamless transitions between screens using React Navigation.
+- **Community Interaction**: Comment on and vote for artworks.
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## Technologies Used
 
-```bash
-npm run reset-project
-```
+- **Frontend**: React Native, Expo, NativeWind
+- **Backend**: Firebase (Authentication, Firestore, Storage)
+- **Language**: TypeScript
+- **Navigation**: React Navigation
+- **Image Handling**: Expo ImagePicker
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Setup
 
-To learn more about developing your project with Expo, look at the following resources:
+1. **Firebase Configuration**:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+   - Create a project in the [Firebase Console](https://console.firebase.google.com/).
+   - Enable **Email/Password Authentication** and **Google Sign-In**.
+   - Set up **Firestore Database** and **Storage** for image handling.
+   - Add your Firebase configuration to a `firebase.ts` file in the `/services` directory.
 
-## Join the community
+2. **Environment Variables**:
+   - Securely configure your Firebase API keys.
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Usage
+
+1. **Start Development Server**:
+   ```bash
+   npx expo start
+   ```
+2. **Testing**:
+
+   - Use the Expo Go app for mobile testing or run on an Android/iOS emulator.
+
+3. **Deployment**:
+   - Refer to Expo’s documentation for building and deploying the app.
+
+---
+
+## Future Improvements
+
+- **Search and Filtering**: Add advanced search functionality for artworks.
+- **Artist Profiles**: Create detailed profiles linking to their artworks.
+- **Accessibility**: Enhance support for users with disabilities.
+
+---
+
+## Author
+
+- **Name**: Mads Langstad
+- **Course**: TDS200 Crossplatform, Høyskolen Kristiania
+
+---
