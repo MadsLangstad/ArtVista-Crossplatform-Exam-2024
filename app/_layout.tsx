@@ -8,22 +8,24 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { useAuth } from "@/hooks/useAuth"; // Import your useAuth hook
+import { useAuth } from "@/hooks/useAuth";
 import "react-native-reanimated";
+import { initializeFirestoreData } from "@/services/firebaseService";
 import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const { loading } = useAuth(); // Destructure loading from useAuth
-  const [isLogin, setIsLogin] = useState(true); // State to manage Login/Sign Up title
+  const { loading } = useAuth();
+  const [isLogin, setIsLogin] = useState(true);
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
   useEffect(() => {
     if (loaded) {
+      initializeFirestoreData();
       SplashScreen.hideAsync();
     }
   }, [loaded]);
@@ -35,10 +37,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
-        {/* Main Tab Navigator */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-
-        {/* Auth Screens with Dynamic Title */}
         <Stack.Screen
           name="(auth)/auth"
           initialParams={{ isLogin }}
@@ -50,18 +49,10 @@ export default function RootLayout() {
           name="(auth)/forgotPassword"
           options={{ title: "Forgot Password" }}
         />
-
-        {/* Artwork Screens */}
         <Stack.Screen
           name="(artwork)/detail"
           options={{ title: "Artwork Detail" }}
         />
-        <Stack.Screen
-          name="(artwork)/upload"
-          options={{ title: "Upload Artwork" }}
-        />
-
-        {/* Not Found Screen */}
         <Stack.Screen name="+not-found" options={{ title: "Not Found" }} />
       </Stack>
     </ThemeProvider>

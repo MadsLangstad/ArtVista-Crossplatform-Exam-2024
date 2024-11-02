@@ -78,7 +78,6 @@ export default function Auth() {
         }`}
       />
 
-      {/* Use the CustomButton and pass down the props */}
       <CustomButton
         isLoggedIn={isLogin}
         onLogin={handleAuth}
