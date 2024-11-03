@@ -162,9 +162,20 @@ export default function Profile() {
         takeImageWithCamera={takeImageWithCamera}
       />
 
-      <View className="flex-row justify-around w-full mt-4">
-        <Button title="Edit Profile" onPress={() => alert("Edit Profile")} />
-        <Button title="Log Out" color="red" onPress={logOut} />
+      <View className="flex-row justify-center gap-8 w-full mt-4">
+        <TouchableOpacity
+          onPress={() => alert("Edit Profile")}
+          className="bg-blue-500 rounded-lg flex justify-center items-center p-3 w-32"
+        >
+          <Text className="text-white text-lg">Edit Profile</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={logOut}
+          className="bg-red-600 rounded-lg flex justify-center items-center p-3 w-32"
+        >
+          <Text className="text-white text-lg">Log Out</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
