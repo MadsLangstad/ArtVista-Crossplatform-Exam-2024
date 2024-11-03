@@ -13,7 +13,6 @@ import * as ImagePicker from "expo-image-picker";
 import { addArtworkDetails } from "@/services/firebaseService";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { storage } from "@/services/firebaseConfig";
-import { Button } from "@rneui/themed";
 import ProfileHeader from "@/components/ProfileHeader";
 import ImagePickerModal from "@/components/ImagePickerModal";
 
