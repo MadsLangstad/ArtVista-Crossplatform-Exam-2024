@@ -1,35 +1,10 @@
 import { ActivityIndicator, Text, View } from "react-native";
-import React, { memo, useEffect, useState } from "react";
-import { FlatList, Image, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { FlatList } from "react-native";
 import { router } from "expo-router";
 import { ArtworkItemProps } from "@/types/galleryTypes";
-import { ArtworkItemComponentProps } from "@/types/galleryTypes";
 import { fetchArtworks } from "@/services/firebaseService";
-
-const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => (
-  <TouchableOpacity
-    onPress={() => handlePress(item)}
-    className="p-4 mb-6 rounded-lg bg-white dark:bg-gray-800 shadow-md w-full"
-    style={{ elevation: 3 }}
-  >
-    <View className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden mb-3">
-      <Image
-        source={{ uri: item.imageUrl }}
-        className="w-full h-full"
-        resizeMode="cover"
-      />
-    </View>
-
-    <View className="flex flex-col space-y-1">
-      <Text className="text-lg font-bold text-gray-900 dark:text-white">
-        {item.title}
-      </Text>
-      <Text className="text-sm text-gray-600 dark:text-gray-400">
-        {item.description}
-      </Text>
-    </View>
-  </TouchableOpacity>
-));
+import ArtworkItem from "@/components/ArtWorkItem";
 
 export default function Gallery() {
   const [artworks, setArtworks] = useState<Array<ArtworkItemProps>>([]);
@@ -71,8 +46,8 @@ export default function Gallery() {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white dark:bg-black">
-        <ActivityIndicator size="large" color="#00BFFF" />
+      <View className="center-loader">
+        <ActivityIndicator size="large" color="#00E0FF" />
       </View>
     );
   }

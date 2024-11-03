@@ -51,7 +51,7 @@ export default function RootLayout() {
         />
         <Stack.Screen
           name="(artwork)/detail"
-          options={{ title: "Artwork Detail" }}
+          options={{ title: "Artwork Detail", headerBackTitle: "Back" }}
         />
         <Stack.Screen name="+not-found" options={{ title: "Not Found" }} />
       </Stack>

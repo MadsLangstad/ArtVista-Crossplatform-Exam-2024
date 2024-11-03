@@ -43,9 +43,17 @@ export interface UserProfile {
 
 export interface Comment {
   artworkId: string;
+  author: string;
   userId: string;
   text: string;
   timestamp: string;
+}
+
+export interface CommentSectionProps {
+  comments: Comment[];
+  commentText: string;
+  setCommentText: (text: string) => void;
+  handleAddComment: () => void;
 }
 
 export interface Vote {
