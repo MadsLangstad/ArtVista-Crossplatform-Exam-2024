@@ -24,16 +24,6 @@ export default function Profile() {
   const [isUploading, setIsUploading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
-  useEffect(() => {
-    if (!user) {
-      Alert.alert(
-        "Access Denied",
-        "Only logged-in users have access to this page."
-      );
-      router.push("/(auth)/auth");
-    }
-  }, [user]);
-
   const pickImageFromLibrary = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {

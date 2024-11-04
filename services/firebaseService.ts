@@ -13,7 +13,6 @@ import {
   updateDoc,
   getDoc,
   increment,
-  onSnapshot,
   query,
   limit,
 } from "firebase/firestore";
@@ -75,6 +74,7 @@ export const fetchArtworkById = async (id: string) => {
           id: doc.id,
           artworkId: id,
           userId: doc.data().userId,
+          author: doc.data().author,
           text: doc.data().text,
           timestamp: doc.data().timestamp,
         } as Comment)
