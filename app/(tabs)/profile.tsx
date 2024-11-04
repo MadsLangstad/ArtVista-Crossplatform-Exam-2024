@@ -26,6 +26,10 @@ export default function Profile() {
 
   useEffect(() => {
     if (!user) {
+      Alert.alert(
+        "Access Denied",
+        "Only logged-in users have access to this page."
+      );
       router.push("/(auth)/auth");
     }
   }, [user]);
@@ -109,6 +113,22 @@ export default function Profile() {
       setIsUploading(false);
     }
   };
+
+  if (!user)
+    return (
+      <View className="flex-1 justify-center items-center">
+        <TouchableOpacity
+          onPress={() => {
+            router.push("/(auth)/auth");
+          }}
+          className="flex justify-center items-center border-2 border-[#00BFFF] w-28 rounded-lg mt-20"
+        >
+          <Text className="text-[#00BFFF] text-2xl font-semibold px-4">
+            Login
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
 
   return (
     <View className="flex-1 bg-white dark:bg-black p-4">

@@ -1,14 +1,16 @@
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import { router } from "expo-router";
 import { ArtworkItemProps } from "@/types/galleryTypes";
 import { fetchArtworks } from "@/services/firebaseService";
 import ArtworkItem from "@/components/ArtWorkItem";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Gallery() {
   const [artworks, setArtworks] = useState<Array<ArtworkItemProps>>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     const loadArtworks = async () => {
@@ -37,7 +39,16 @@ export default function Gallery() {
   }, []);
 
   const handleArtworkPress = (artwork: { id: string }) => {
-    router.push(`/(artwork)/detail?id=${artwork.id}`);
+    if (!user) {
+      Alert.alert(
+        "Access Denied",
+        "Only logged-in users have access to this page."
+      );
+      router.push("/(auth)/auth");
+      return;
+    } else {
+      router.push(`/(artwork)/detail?id=${artwork.id}`);
+    }
   };
 
   const renderItem = ({ item }: { item: ArtworkItemProps }) => (

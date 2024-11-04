@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Alert, TouchableOpacity } from "react-native";
 import { useAuth } from "../../hooks/useAuth";
 import { useColorScheme } from "react-native";
@@ -6,12 +6,18 @@ import { router } from "expo-router";
 import CustomButton from "@/components/Button";
 
 export default function Auth() {
-  const { signIn, signUp } = useAuth();
+  const { user, signIn, signUp } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    if (user) {
+      router.push("/(tabs)/profile");
+    }
+  }, [user]);
 
   const handleAuth = async () => {
     if (!email || !password) {

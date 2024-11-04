@@ -44,6 +44,7 @@ export default function RootLayout() {
           initialParams={{ isLogin }}
           options={{
             title: isLogin ? "Login" : "Sign Up",
+            headerBackTitle: "Profile",
           }}
         />
         <Stack.Screen
