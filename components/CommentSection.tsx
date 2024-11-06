@@ -36,7 +36,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         />
         <TouchableOpacity
           onPress={handleAddComment}
-          className="bg-blue-500 p-3 rounded-lg"
+          className="bg-blue-700 p-3 rounded-lg"
         >
           <Text className="text-white text-center">Add Comment</Text>
         </TouchableOpacity>

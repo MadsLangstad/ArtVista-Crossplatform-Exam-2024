@@ -92,7 +92,7 @@ export default function Detail() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-white dark:bg-black">
-        <ActivityIndicator size="large" color="#00BFFF" />
+        <ActivityIndicator size="large" color="#E91E63" />
       </View>
     );
   }
@@ -113,7 +113,7 @@ export default function Detail() {
         <View className="relative w-full h-80 mb-4 bg-white dark:bg-black">
           {imageLoading && (
             <View className="center-loader">
-              <ActivityIndicator size="large" color="#00E0FF" />
+              <ActivityIndicator size="large" color="#E91E63" />
             </View>
           )}
           <Image

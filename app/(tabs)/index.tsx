@@ -1,6 +1,13 @@
-import { ActivityIndicator, Alert, Text, View } from "react-native";
-import React, { useEffect, useState } from "react";
-import { FlatList } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
+  Animated,
+} from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { FlatList, TextInput } from "react-native";
 import { router } from "expo-router";
 import { ArtworkItemProps } from "@/types/galleryTypes";
 import { fetchArtworks } from "@/services/firebaseService";
@@ -11,12 +18,12 @@ export default function Gallery() {
   const [artworks, setArtworks] = useState<Array<ArtworkItemProps>>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { user } = useAuth();
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const loadArtworks = async () => {
       try {
         const fetchedArtworks = await fetchArtworks();
-
         const transformedArtworks: ArtworkItemProps[] = fetchedArtworks
           .map((artwork) => ({
             id: artwork.id ?? "default-id",
@@ -58,21 +65,58 @@ export default function Gallery() {
   if (loading) {
     return (
       <View className="center-loader">
-        <ActivityIndicator size="large" color="#00E0FF" />
+        <ActivityIndicator size="large" color="#E91E63" />
       </View>
     );
   }
 
+  // Animate the search bar's vertical position
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 10],
+    outputRange: [0, -55],
+    extrapolate: "clamp",
+  });
+
   return (
-    <View className="flex-1 bg-white dark:bg-black p-4">
-      <FlatList
+    <View className="flex dark:bg-black p-4">
+      {/* Animated header */}
+      <Animated.View
+        style={{
+          transform: [{ translateY: headerTranslateY }],
+          zIndex: 1,
+        }}
+        className="flex justify-between flex-row"
+      >
+        <TextInput
+          className="border-2 p-2 border-[#E91E63] rounded-lg w-[275px] dark:text-[#E91E63]"
+          placeholder="Search for specific artwork"
+        />
+        <TouchableOpacity
+          className="flex justify-center items-center bg-blue-700 rounded-lg px-2"
+          onPress={() => {
+            Alert.alert(
+              "Search",
+              "Search functionality is not implemented yet."
+            );
+          }}
+        >
+          <Text className="text-lg p-2 font-semibold text-white">Search</Text>
+        </TouchableOpacity>
+      </Animated.View>
+
+      {/* FlatList with onScroll to animate the header */}
+      <Animated.FlatList
         data={artworks}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         numColumns={1}
         showsVerticalScrollIndicator={false}
-        className="w-full"
-        contentContainerStyle={{ paddingBottom: 16 }}
+        className="w-full dark:bg-black rounded-lg"
+        contentContainerStyle={{ paddingTop: 10, paddingBottom: 16 }} // Added paddingTop to prevent overlap
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
       />
     </View>
   );

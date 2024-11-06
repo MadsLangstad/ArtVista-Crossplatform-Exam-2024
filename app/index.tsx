@@ -14,7 +14,7 @@ export default function SplashScreen() {
   }, [router]);
 
   return (
-    <View className="flex top-32 justify-center items-center bg-black px-6">
+    <View className="flex top-32 justify-center items-center dark:bg-black px-6">
       <Image
         source={require("../assets/images/artvista-logo.png")}
         className="w-96 h-96"
@@ -22,7 +22,7 @@ export default function SplashScreen() {
       />
 
       <View className="flex gap-6 items-center">
-        <Text className="text-[#00BFFF] text-3xl font-extrabold text-center tracking-wider">
+        <Text className="text-blue-700 text-3xl font-extrabold text-center tracking-wider">
           Welcome To ArtVista
         </Text>
         <Text className="text-pink-500 text-lg font-semibold text-center leading-relaxed">
@@ -35,9 +35,9 @@ export default function SplashScreen() {
           onPress={() => {
             router.push("/(tabs)/");
           }}
-          className="flex justify-center items-center border-2 border-[#00BFFF] w-28 rounded-lg mt-20"
+          className="flex justify-center items-center border-2 border-blue-700 w-28 rounded-lg mt-20"
         >
-          <Text className="text-[#00BFFF] text-2xl font-semibold px-4">
+          <Text className="text-blue-700 text-2xl font-semibold px-4">
             Enter
           </Text>
         </TouchableOpacity>

@@ -15,6 +15,7 @@ import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { storage } from "@/services/firebaseConfig";
 import ProfileHeader from "@/components/ProfileHeader";
 import ImagePickerModal from "@/components/ImagePickerModal";
+import EditProfileModal from "@/components/EditProfileModal"; // Import the new modal
 
 export default function Profile() {
   const { user, logOut } = useAuth();
@@ -23,6 +24,7 @@ export default function Profile() {
   const [description, setDescription] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false); // New state for EditProfileModal
 
   const pickImageFromLibrary = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -104,6 +106,12 @@ export default function Profile() {
     }
   };
 
+  const saveProfile = (data: any) => {
+    // Placeholder for profile update logic
+    console.log("Save profile with data:", data);
+    // You can add Firebase update logic here or other state updates
+  };
+
   if (!user)
     return (
       <View className="flex-1 justify-center items-center">
@@ -136,19 +144,19 @@ export default function Profile() {
           placeholder="Title"
           value={title}
           onChangeText={setTitle}
-          className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-3 rounded-lg"
+          className="bg-gray-200 dark:bg-black text-black border-2 border-[#E91E63] dark:text-white p-3 rounded-lg"
         />
         <TextInput
           placeholder="Description"
           value={description}
           onChangeText={setDescription}
-          className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-3 rounded-lg mb-4"
+          className="bg-gray-200 dark:bg-black text-black border-2 border-[#E91E63] dark:text-white p-3 rounded-lg mb-4"
           multiline
         />
 
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
-          className="bg-blue-500 p-3 rounded-lg"
+          className="bg-blue-700 p-3 rounded-lg"
         >
           <Text className="text-white text-center">Add Image</Text>
         </TouchableOpacity>
@@ -156,7 +164,7 @@ export default function Profile() {
         <TouchableOpacity
           onPress={handleUpload}
           disabled={isUploading}
-          className="bg-blue-500 p-3 rounded-lg"
+          className="bg-blue-700 p-3 rounded-lg"
         >
           <Text className="text-white text-center">
             {isUploading ? "Uploading..." : "Upload Image"}
@@ -173,19 +181,25 @@ export default function Profile() {
 
       <View className="flex-row justify-center gap-8 w-full mt-4">
         <TouchableOpacity
-          onPress={() => alert("Edit Profile")}
-          className="bg-blue-500 rounded-lg flex justify-center items-center p-3 w-32"
+          onPress={() => setEditModalVisible(true)}
+          className="bg-blue-700 rounded-lg flex justify-center items-center p-3 w-32"
         >
           <Text className="text-white text-lg">Edit Profile</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={logOut}
-          className="bg-red-600 rounded-lg flex justify-center items-center p-3 w-32"
+          className="bg-[#E61E63] rounded-lg flex justify-center items-center p-3 w-32"
         >
           <Text className="text-white text-lg">Log Out</Text>
         </TouchableOpacity>
       </View>
+
+      <EditProfileModal
+        modalVisible={editModalVisible}
+        setModalVisible={setEditModalVisible}
+        saveProfile={saveProfile}
+      />
     </View>
   );
 }
