@@ -20,6 +20,7 @@ import {
   startAfter,
   DocumentSnapshot,
   QueryDocumentSnapshot,
+  endBefore,
 } from "firebase/firestore";
 import { app } from "./firebaseConfig";
 import {
@@ -32,17 +33,34 @@ const storage = getStorage(app);
 export const firestore = getFirestore(app);
 
 // Artworks
-export const fetchArtworks = async (): Promise<ArtworkItemProps[]> => {
-  try {
-    const querySnapshot = await getDocs(collection(firestore, "artworks"));
-    return querySnapshot.docs.map((doc: QueryDocumentSnapshot) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as ArtworkItemProps[];
-  } catch (error) {
-    console.error("Error fetching artworks:", error);
-    return [];
+export const fetchArtworks = async (
+  referenceDoc: DocumentSnapshot | null = null,
+  loadOlderItems: boolean = false,
+  pageSize: number = 10
+): Promise<{
+  artworks: ArtworkItemProps[];
+  firstVisible: DocumentSnapshot | null;
+}> => {
+  let artworksQuery = query(
+    collection(firestore, "artworks"),
+    orderBy("uploadDate", "desc"),
+    limit(pageSize)
+  );
+
+  if (referenceDoc) {
+    artworksQuery = loadOlderItems
+      ? query(artworksQuery, endBefore(referenceDoc))
+      : query(artworksQuery, startAfter(referenceDoc));
   }
+
+  const artworkSnapshots = await getDocs(artworksQuery);
+  const artworks = artworkSnapshots.docs.map((doc) => ({
+    ...(doc.data() as ArtworkItemProps),
+    id: doc.id,
+  }));
+
+  const newReferenceDoc = artworkSnapshots.docs[0] || null;
+  return { artworks, firstVisible: newReferenceDoc };
 };
 
 export const fetchArtworkById = async (id: string) => {

@@ -14,41 +14,44 @@ import { ArtworkItemProps } from "@/types/galleryTypes";
 import { fetchArtworks } from "@/services/firebaseService";
 import ArtworkItem from "@/components/ArtWorkItem";
 import { useAuth } from "@/hooks/useAuth";
+import { DocumentSnapshot } from "firebase/firestore"; // Ensure this is imported
 
 // Get device height
 const { height: screenHeight } = Dimensions.get("window");
 
 export default function Gallery() {
-  const [artworks, setArtworks] = useState<Array<ArtworkItemProps>>([]);
+  const [artworks, setArtworks] = useState<ArtworkItemProps[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [lastVisible, setLastVisible] = useState<DocumentSnapshot | null>(null);
   const { user } = useAuth();
   const scrollY = useRef(new Animated.Value(0)).current;
 
+  const loadArtworks = async (refresh = false) => {
+    try {
+      if (refresh) setRefreshing(true);
+      else setLoading(true);
+
+      const { artworks: fetchedArtworks, firstVisible: newLastVisible } =
+        await fetchArtworks(null); // Fetch the latest artworks
+
+      setArtworks(fetchedArtworks);
+      setLastVisible(newLastVisible);
+    } catch (error) {
+      console.error("Error fetching artworks:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
-    const loadArtworks = async () => {
-      try {
-        const fetchedArtworks = await fetchArtworks();
-        console.log("Fetched Artworks:", fetchedArtworks); // Debugging line
-        const transformedArtworks: ArtworkItemProps[] = fetchedArtworks
-          .map((artwork) => ({
-            id: artwork.id ?? "default-id",
-            title: artwork.title,
-            imageUrl: artwork.imageUrl,
-            description: artwork.description,
-            abstract: artwork.description,
-          }))
-          .filter((artwork) => artwork.id !== "default-id");
-
-        setArtworks(transformedArtworks);
-      } catch (error) {
-        console.error("Error fetching artworks:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadArtworks();
   }, []);
+
+  const handleRefresh = () => {
+    loadArtworks(true); // Trigger a refresh
+  };
 
   const handleArtworkPress = (artwork: ArtworkItemProps) => {
     if (!user) {
@@ -67,7 +70,7 @@ export default function Gallery() {
     <ArtworkItem item={item} handlePress={handleArtworkPress} />
   );
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <View className="center-loader">
         <ActivityIndicator size="large" color="#E91E63" />
@@ -108,7 +111,7 @@ export default function Gallery() {
         </TouchableOpacity>
       </Animated.View>
 
-      {/* Animated.FlatList with onScroll to animate the header */}
+      {/* FlatList with pull-to-refresh */}
       <Animated.FlatList
         data={artworks}
         renderItem={renderItem}
@@ -125,6 +128,15 @@ export default function Gallery() {
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true }
         )}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
+        ListFooterComponent={
+          loading && !refreshing ? (
+            <View style={{ paddingVertical: 20 }}>
+              <ActivityIndicator size="small" color="#E91E63" />
+            </View>
+          ) : null
+        }
       />
     </View>
   );
