@@ -5,14 +5,18 @@ import {
   TouchableOpacity,
   View,
   Animated,
+  Dimensions,
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
-import { FlatList, TextInput } from "react-native";
+import { TextInput } from "react-native";
 import { router } from "expo-router";
 import { ArtworkItemProps } from "@/types/galleryTypes";
 import { fetchArtworks } from "@/services/firebaseService";
 import ArtworkItem from "@/components/ArtWorkItem";
 import { useAuth } from "@/hooks/useAuth";
+
+// Get device height
+const { height: screenHeight } = Dimensions.get("window");
 
 export default function Gallery() {
   const [artworks, setArtworks] = useState<Array<ArtworkItemProps>>([]);
@@ -24,6 +28,7 @@ export default function Gallery() {
     const loadArtworks = async () => {
       try {
         const fetchedArtworks = await fetchArtworks();
+        console.log("Fetched Artworks:", fetchedArtworks); // Debugging line
         const transformedArtworks: ArtworkItemProps[] = fetchedArtworks
           .map((artwork) => ({
             id: artwork.id ?? "default-id",
@@ -45,7 +50,7 @@ export default function Gallery() {
     loadArtworks();
   }, []);
 
-  const handleArtworkPress = (artwork: { id: string }) => {
+  const handleArtworkPress = (artwork: ArtworkItemProps) => {
     if (!user) {
       Alert.alert(
         "Access Denied",
@@ -83,7 +88,6 @@ export default function Gallery() {
       <Animated.View
         style={{
           transform: [{ translateY: headerTranslateY }],
-          zIndex: 1,
         }}
         className="flex justify-between flex-row"
       >
@@ -104,15 +108,19 @@ export default function Gallery() {
         </TouchableOpacity>
       </Animated.View>
 
-      {/* FlatList with onScroll to animate the header */}
+      {/* Animated.FlatList with onScroll to animate the header */}
       <Animated.FlatList
         data={artworks}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         numColumns={1}
         showsVerticalScrollIndicator={false}
-        className="w-full dark:bg-black rounded-lg"
-        contentContainerStyle={{ paddingTop: 10, paddingBottom: 16 }} // Added paddingTop to prevent overlap
+        className="w-full rounded-lg"
+        contentContainerStyle={{
+          paddingTop: 10,
+          paddingBottom: 16,
+          minHeight: screenHeight,
+        }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true }

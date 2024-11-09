@@ -11,6 +11,7 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("");
   const colorScheme = useColorScheme();
 
   useEffect(() => {
@@ -30,7 +31,6 @@ export default function Auth() {
       if (isLogin) {
         await signIn(email, password);
         router.push("/(tabs)/profile");
-      } else {
         await signUp(email, password);
         router.push("/(tabs)/profile");
       }
@@ -56,6 +56,20 @@ export default function Auth() {
       >
         {isLogin ? "Login" : "Sign Up"}
       </Text>
+      {!isLogin && (
+        <TextInput
+          placeholder="Username"
+          placeholderTextColor="#888"
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
+          className={`w-full p-3 mb-4 rounded-lg ${
+            colorScheme === "dark"
+              ? "bg-gray-800 text-white"
+              : "bg-gray-200 text-black"
+          }`}
+        />
+      )}
 
       <TextInput
         placeholder="Email"

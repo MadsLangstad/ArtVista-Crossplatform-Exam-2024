@@ -42,6 +42,7 @@ export interface UserProfile {
 }
 
 export interface Comment {
+  id: string;
   artworkId: string;
   author: string;
   userId: string;
@@ -54,6 +55,7 @@ export interface CommentSectionProps {
   commentText: string;
   setCommentText: (text: string) => void;
   handleAddComment: () => void;
+  setComments: React.Dispatch<React.SetStateAction<Comment[]>>;
 }
 
 export interface Vote {

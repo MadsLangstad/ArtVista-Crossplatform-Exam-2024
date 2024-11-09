@@ -15,45 +15,33 @@ import {
   increment,
   query,
   limit,
+  deleteDoc,
+  orderBy,
+  startAfter,
+  DocumentSnapshot,
+  QueryDocumentSnapshot,
 } from "firebase/firestore";
 import { app } from "./firebaseConfig";
-import { ArtworkDetails, Comment } from "@/types/galleryTypes";
+import {
+  ArtworkDetails,
+  ArtworkItemProps,
+  Comment,
+} from "@/types/galleryTypes";
 
 const storage = getStorage(app);
 export const firestore = getFirestore(app);
 
-export const uploadArtworkImage = async (file: Blob, fileName: string) => {
+// Artworks
+export const fetchArtworks = async (): Promise<ArtworkItemProps[]> => {
   try {
-    const storageRef = ref(storage, `artwork-images/${fileName}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    return new Promise((resolve, reject) => {
-      uploadTask.on(
-        "state_changed",
-        null,
-        (error) =>
-          reject(new Error("Failed to upload image. Please try again.")),
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve(downloadURL);
-        }
-      );
-    });
+    const querySnapshot = await getDocs(collection(firestore, "artworks"));
+    return querySnapshot.docs.map((doc: QueryDocumentSnapshot) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as ArtworkItemProps[];
   } catch (error) {
-    throw new Error("Failed to upload image. Please try again.");
-  }
-};
-
-export const addArtworkDetails = async (artworkDetails: ArtworkDetails) => {
-  try {
-    const docRef = await addDoc(collection(firestore, "artworks"), {
-      ...artworkDetails,
-      upvotes: 0,
-      downvotes: 0,
-    });
-    return docRef.id;
-  } catch (error) {
-    throw new Error("Failed to add artwork details. Please try again.");
+    console.error("Error fetching artworks:", error);
+    return [];
   }
 };
 
@@ -86,19 +74,25 @@ export const fetchArtworkById = async (id: string) => {
   }
 };
 
-export const addComment = async (
-  artworkId: string,
-  text: string,
-  userId: string
-) => {
+export const uploadArtworkImage = async (file: Blob, fileName: string) => {
   try {
-    const comment = { text, timestamp: new Date().toISOString(), userId };
-    await addDoc(
-      collection(firestore, `artworks/${artworkId}/comments`),
-      comment
-    );
+    const storageRef = ref(storage, `artwork-images/${fileName}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        null,
+        (error) =>
+          reject(new Error("Failed to upload image. Please try again.")),
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          resolve(downloadURL);
+        }
+      );
+    });
   } catch (error) {
-    throw new Error("Failed to add comment. Please try again.");
+    throw new Error("Failed to upload image. Please try again.");
   }
 };
 
@@ -118,34 +112,120 @@ export const voteArtwork = async (
   }
 };
 
-export const fetchArtworks = async (): Promise<ArtworkDetails[]> => {
+export const addArtworkDetails = async (artworkDetails: ArtworkDetails) => {
   try {
-    const querySnapshot = await getDocs(collection(firestore, "artworks"));
-    const artworks: ArtworkDetails[] = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      artworks.push({
-        id: doc.id,
-        title: data.title,
-        description: data.description,
-        imageUrl: data.imageUrl,
-        artist: data.artist,
-        year: data.year,
-        hashtags: data.hashtags,
-        artistId: data.artistId,
-        uploadDate: data.uploadDate,
-        exhibitionInfo: data.exhibitionInfo,
-        upvotes: data.upvotes || 0,
-        downvotes: data.downvotes || 0,
-        upvote: data.upvote || 0,
-        downvote: data.downvote || 0,
-      } as ArtworkDetails);
+    const docRef = await addDoc(collection(firestore, "artworks"), {
+      ...artworkDetails,
+      upvotes: 0,
+      downvotes: 0,
     });
-    return artworks;
+    return docRef.id;
   } catch (error) {
-    throw new Error("Failed to fetch artworks. Please try again.");
+    throw new Error("Failed to add artwork details. Please try again.");
   }
 };
+
+// Comments
+export const fetchComments = async (
+  artworkId: string,
+  lastComment?: DocumentSnapshot,
+  pageSize: number = 10
+): Promise<{ comments: Comment[]; lastVisible: DocumentSnapshot | null }> => {
+  console.log("Fetching comments for artworkId:", artworkId); // Debug log
+  const commentsRef = collection(firestore, `artworks/${artworkId}/comments`);
+
+  let commentsQuery = query(
+    commentsRef,
+    orderBy("timestamp", "desc"),
+    limit(pageSize)
+  );
+  if (lastComment) {
+    commentsQuery = query(
+      commentsRef,
+      orderBy("timestamp", "desc"),
+      startAfter(lastComment),
+      limit(pageSize)
+    );
+  }
+
+  try {
+    const commentSnapshots = await getDocs(commentsQuery);
+    const comments: Comment[] = commentSnapshots.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          artworkId,
+          ...doc.data(),
+        } as Comment)
+    );
+
+    const lastVisible =
+      commentSnapshots.docs[commentSnapshots.docs.length - 1] || null;
+
+    console.log("Fetched comments:", comments); // Log fetched comments
+    console.log("Last visible document:", lastVisible); // Log last visible doc for pagination
+    return { comments, lastVisible };
+  } catch (error) {
+    console.error("Error fetching comments:", error); // Log error if any
+    throw new Error("Failed to fetch comments. Please try again.");
+  }
+};
+
+export const addComment = async (
+  artworkId: string,
+  text: string,
+  userId: string
+): Promise<string> => {
+  try {
+    const comment = { text, timestamp: new Date().toISOString(), userId };
+    const docRef = await addDoc(
+      collection(firestore, `artworks/${artworkId}/comments`),
+      comment
+    );
+    return docRef.id;
+  } catch (error) {
+    throw new Error("Failed to add comment. Please try again.");
+  }
+};
+
+export const editComment = async (
+  artworkId: string,
+  commentId: string,
+  newText: string
+) => {
+  try {
+    const commentRef = doc(
+      firestore,
+      `artworks/${artworkId}/comments`,
+      commentId
+    );
+    await updateDoc(commentRef, {
+      text: newText,
+      editedAt: new Date().toISOString(),
+    });
+    console.log("Comment updated successfully");
+  } catch (error) {
+    console.error("Error updating comment:", error);
+    throw new Error("Failed to update comment. Please try again.");
+  }
+};
+
+export const deleteComment = async (artworkId: string, commentId: string) => {
+  try {
+    const commentRef = doc(
+      firestore,
+      `artworks/${artworkId}/comments`,
+      commentId
+    );
+    await deleteDoc(commentRef); // This will permanently delete the document
+    console.log("Comment deleted successfully");
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    throw new Error("Failed to delete comment. Please try again.");
+  }
+};
+
+// Sample data
 
 const sampleArtwork = {
   title: "Starry Night",

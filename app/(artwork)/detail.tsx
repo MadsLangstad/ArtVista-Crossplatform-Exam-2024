@@ -6,8 +6,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { firestore } from "@/services/firebaseService";
-import { onSnapshot, doc } from "firebase/firestore";
+import { fetchComments, firestore } from "@/services/firebaseService";
+import {
+  onSnapshot,
+  doc,
+  DocumentSnapshot,
+  DocumentData,
+} from "firebase/firestore";
 import { voteArtwork, addComment } from "@/services/firebaseService";
 import { ArtworkDetails, Comment } from "@/types/galleryTypes";
 import { useLocalSearchParams } from "expo-router";
@@ -24,8 +29,27 @@ export default function Detail() {
   const [downvotes, setDownvotes] = useState(0);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<Comment[]>([]);
+  const [lastComment, setLastComment] =
+    useState<DocumentSnapshot<DocumentData> | null>(null);
   const [loading, setLoading] = useState(true);
   const [imageLoading, setImageLoading] = useState(true);
+
+  useEffect(() => {
+    if (id) {
+      const fetchInitialComments = async () => {
+        try {
+          const { comments: fetchedComments, lastVisible } =
+            await fetchComments(Array.isArray(id) ? id[0] : id);
+          setComments(fetchedComments);
+          setLastComment(lastVisible);
+          console.log("Initial comments loaded:", fetchedComments); // Log fetched comments
+        } catch (error) {
+          console.error("Error loading initial comments:", error);
+        }
+      };
+      fetchInitialComments();
+    }
+  }, [id]);
 
   useEffect(() => {
     if (id) {
@@ -69,10 +93,15 @@ export default function Detail() {
   const handleAddComment = async () => {
     if (id && commentText.trim() && user) {
       try {
-        await addComment(Array.isArray(id) ? id[0] : id, commentText, user.uid);
+        const commentId = await addComment(
+          Array.isArray(id) ? id[0] : id,
+          commentText,
+          user.uid
+        );
         setComments([
           ...comments,
           {
+            id: commentId,
             text: commentText,
             userId: user.uid,
             author: user.displayName || "Anonymous User",
@@ -105,6 +134,14 @@ export default function Detail() {
         </Text>
       </View>
     );
+  }
+
+  function fetchMoreComments(): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
   }
 
   return (
@@ -149,11 +186,14 @@ export default function Detail() {
           </View>
         </View>
 
+        {/* Artwork Details Code */}
         <CommentSection
           comments={comments}
           commentText={commentText}
           setCommentText={setCommentText}
           handleAddComment={handleAddComment}
+          setComments={setComments}
+          fetchMoreComments={fetchMoreComments}
         />
       </View>
     </View>
