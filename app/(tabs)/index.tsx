@@ -6,6 +6,8 @@ import {
   View,
   Animated,
   Dimensions,
+  RefreshControl,
+  StyleSheet,
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
 import { TextInput } from "react-native";
@@ -14,9 +16,14 @@ import { ArtworkItemProps } from "@/types/galleryTypes";
 import { fetchArtworks } from "@/services/firebaseService";
 import ArtworkItem from "@/components/ArtWorkItem";
 import { useAuth } from "@/hooks/useAuth";
-import { DocumentSnapshot } from "firebase/firestore"; // Ensure this is imported
+import { DocumentSnapshot } from "firebase/firestore";
 
-// Get device height
+const headerTranslateYConfig: Animated.InterpolationConfigType = {
+  inputRange: [0, 10],
+  outputRange: [0, -55],
+  extrapolate: "clamp" as const,
+};
+
 const { height: screenHeight } = Dimensions.get("window");
 
 export default function Gallery() {
@@ -27,16 +34,25 @@ export default function Gallery() {
   const { user } = useAuth();
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  const loadArtworks = async (refresh = false) => {
+  const fetchArtworksData = async (refresh = false) => {
     try {
-      if (refresh) setRefreshing(true);
-      else setLoading(true);
+      if (refresh) {
+        setRefreshing(true);
+        setLastVisible(null); // Reset lastVisible on refresh
+      } else {
+        setLoading(true);
+      }
 
-      const { artworks: fetchedArtworks, firstVisible: newLastVisible } =
-        await fetchArtworks(null); // Fetch the latest artworks
+      const {
+        artworks: fetchedArtworks,
+        firstVisible: newFirstVisible,
+        lastVisible: newLastVisible,
+      } = await fetchArtworks(refresh ? null : lastVisible);
 
-      setArtworks(fetchedArtworks);
-      setLastVisible(newLastVisible);
+      setArtworks(
+        refresh ? fetchedArtworks : [...artworks, ...fetchedArtworks]
+      );
+      setLastVisible(newLastVisible); // Update the last visible item
     } catch (error) {
       console.error("Error fetching artworks:", error);
     } finally {
@@ -46,12 +62,10 @@ export default function Gallery() {
   };
 
   useEffect(() => {
-    loadArtworks();
+    fetchArtworksData();
   }, []);
 
-  const handleRefresh = () => {
-    loadArtworks(true); // Trigger a refresh
-  };
+  const refreshArtworksData = () => fetchArtworksData(true);
 
   const handleArtworkPress = (artwork: ArtworkItemProps) => {
     if (!user) {
@@ -71,33 +85,22 @@ export default function Gallery() {
   );
 
   if (loading && !refreshing) {
-    return (
-      <View className="center-loader">
-        <ActivityIndicator size="large" color="#E91E63" />
-      </View>
-    );
+    return <Loader />;
   }
 
-  // Animate the search bar's vertical position
-  const headerTranslateY = scrollY.interpolate({
-    inputRange: [0, 10],
-    outputRange: [0, -55],
-    extrapolate: "clamp",
-  });
+  const headerTranslateY = scrollY.interpolate(headerTranslateYConfig);
 
   return (
     <View className="flex dark:bg-black p-4">
-      {/* Animated header */}
       <Animated.View
-        style={{
-          transform: [{ translateY: headerTranslateY }],
-        }}
+        style={{ transform: [{ translateY: headerTranslateY }] }}
         className="flex justify-between flex-row"
       >
         <TextInput
-          className="border-2 p-2 border-[#E91E63] rounded-lg w-[275px] dark:text-[#E91E63]"
+          className="border-2 border-pink-700 text-pink-700 px-2 font-semibold rounded-lg w-3/4"
           placeholder="Search for specific artwork"
         />
+
         <TouchableOpacity
           className="flex justify-center items-center bg-blue-700 rounded-lg px-2"
           onPress={() => {
@@ -111,29 +114,29 @@ export default function Gallery() {
         </TouchableOpacity>
       </Animated.View>
 
-      {/* FlatList with pull-to-refresh */}
       <Animated.FlatList
         data={artworks}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         numColumns={1}
         showsVerticalScrollIndicator={false}
-        className="w-full rounded-lg"
-        contentContainerStyle={{
-          paddingTop: 10,
-          paddingBottom: 16,
-          minHeight: screenHeight,
-        }}
+        style={styles.container}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true }
         )}
-        refreshing={refreshing}
-        onRefresh={handleRefresh}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refreshArtworksData}
+            colors={["#E91E63"]}
+            tintColor="#E91E63"
+          />
+        }
         ListFooterComponent={
           loading && !refreshing ? (
-            <View style={{ paddingVertical: 20 }}>
-              <ActivityIndicator size="small" color="#E91E63" />
+            <View style={styles.footerLoader}>
+              <ActivityIndicator size="large" color="#E91E63" />
             </View>
           ) : null
         }
@@ -141,3 +144,25 @@ export default function Gallery() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingTop: 10,
+    paddingBottom: 16,
+    minHeight: screenHeight,
+  },
+  searchBar: {
+    borderColor: "#E91E63",
+    color: "#E91E63",
+    width: 275,
+  },
+  footerLoader: {
+    paddingVertical: 20,
+  },
+});
+
+const Loader = () => (
+  <View className="center-loader">
+    <ActivityIndicator size="large" color="#E91E63" />
+  </View>
+);

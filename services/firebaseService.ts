@@ -40,27 +40,42 @@ export const fetchArtworks = async (
 ): Promise<{
   artworks: ArtworkItemProps[];
   firstVisible: DocumentSnapshot | null;
+  lastVisible: DocumentSnapshot | null;
 }> => {
+  // Base query with ordering by 'uploadDate' in descending order
   let artworksQuery = query(
     collection(firestore, "artworks"),
     orderBy("uploadDate", "desc"),
     limit(pageSize)
   );
 
+  // Adjust query based on pagination direction
   if (referenceDoc) {
     artworksQuery = loadOlderItems
-      ? query(artworksQuery, endBefore(referenceDoc))
-      : query(artworksQuery, startAfter(referenceDoc));
+      ? query(artworksQuery, startAfter(referenceDoc))
+      : query(artworksQuery, endBefore(referenceDoc));
   }
 
-  const artworkSnapshots = await getDocs(artworksQuery);
-  const artworks = artworkSnapshots.docs.map((doc) => ({
-    ...(doc.data() as ArtworkItemProps),
-    id: doc.id,
-  }));
+  try {
+    // Execute the query
+    const artworkSnapshots = await getDocs(artworksQuery);
 
-  const newReferenceDoc = artworkSnapshots.docs[0] || null;
-  return { artworks, firstVisible: newReferenceDoc };
+    // Map data to artwork items
+    const artworks = artworkSnapshots.docs.map((doc) => ({
+      ...(doc.data() as ArtworkItemProps),
+      id: doc.id,
+    }));
+
+    // Identify new pagination references for the fetched items
+    const firstVisible = artworkSnapshots.docs[0] || null;
+    const lastVisible =
+      artworkSnapshots.docs[artworkSnapshots.docs.length - 1] || null;
+
+    return { artworks, firstVisible, lastVisible };
+  } catch (error) {
+    console.error("Error fetching artworks:", error);
+    throw new Error("Failed to fetch artworks. Please try again.");
+  }
 };
 
 export const fetchArtworkById = async (id: string) => {
