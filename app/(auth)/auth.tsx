@@ -31,6 +31,7 @@ export default function Auth() {
       if (isLogin) {
         await signIn(email, password);
         router.push("/(tabs)/profile");
+      } else {
         await signUp(email, password);
         router.push("/(tabs)/profile");
       }
