@@ -1,41 +1,59 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
-import { database } from "@/services/firebaseConfig"; // Add database
-import { get, ref as dbRef } from "firebase/database"; // Import database functions
+import { doc, getDoc } from "firebase/firestore";
+import { firestore } from "@/services/firebaseService";
 
-export default function ProfileHeader() {
+interface ProfileHeaderProps {
+  refresh: boolean;
+}
+
+export default function ProfileHeader({ refresh }: ProfileHeaderProps) {
   const { user } = useAuth();
-  const [username, setUsername] = useState(""); // New state for username
+  const [profileData, setProfileData] = useState({
+    username: "Loading...",
+    bio: "",
+    profileImageUrl: "",
+  });
 
-  // Fetch username from the database
   useEffect(() => {
-    const fetchUsername = async () => {
+    const fetchProfileData = async () => {
       if (user) {
-        const usernameRef = dbRef(database, `users/${user.uid}/username`);
-        const snapshot = await get(usernameRef);
-        if (snapshot.exists()) {
-          setUsername(snapshot.val());
+        const userDoc = await getDoc(doc(firestore, "users", user.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setProfileData({
+            username: data.username || "Unknown",
+            bio: data.bio || "",
+            profileImageUrl: data.profileImageUrl || user.photoURL || "",
+          });
         }
       }
     };
-    fetchUsername();
-  }, [user]);
+    fetchProfileData();
+  }, [user, refresh]);
 
   if (!user) return null;
 
   return (
-    <View className="flex-row justify-between items-center">
+    <View className="flex-row pb-4 justify-between items-center">
       <View>
         <Text className="text-black dark:text-white text-2xl font-bold">
-          {username}
+          {profileData.username}
         </Text>
+        {profileData.bio ? (
+          <Text className="text-gray-800 w-64 dark:text-gray-400 text-lg">
+            {profileData.bio}
+          </Text>
+        ) : null}
         <Text className="text-gray-800 dark:text-gray-400 text-lg">
           {user.email}
         </Text>
       </View>
       <Image
-        source={{ uri: user.photoURL || "https://via.placeholder.com/150" }}
+        source={{
+          uri: profileData.profileImageUrl || "https://via.placeholder.com/150",
+        }}
         className="w-36 h-36 rounded-full"
         resizeMode="cover"
       />

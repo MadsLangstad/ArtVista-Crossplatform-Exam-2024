@@ -42,14 +42,12 @@ export const fetchArtworks = async (
   firstVisible: DocumentSnapshot | null;
   lastVisible: DocumentSnapshot | null;
 }> => {
-  // Base query with ordering by 'uploadDate' in descending order
   let artworksQuery = query(
     collection(firestore, "artworks"),
     orderBy("uploadDate", "desc"),
     limit(pageSize)
   );
 
-  // Adjust query based on pagination direction
   if (referenceDoc) {
     artworksQuery = loadOlderItems
       ? query(artworksQuery, startAfter(referenceDoc))
@@ -57,16 +55,13 @@ export const fetchArtworks = async (
   }
 
   try {
-    // Execute the query
     const artworkSnapshots = await getDocs(artworksQuery);
 
-    // Map data to artwork items
     const artworks = artworkSnapshots.docs.map((doc) => ({
       ...(doc.data() as ArtworkItemProps),
       id: doc.id,
     }));
 
-    // Identify new pagination references for the fetched items
     const firstVisible = artworkSnapshots.docs[0] || null;
     const lastVisible =
       artworkSnapshots.docs[artworkSnapshots.docs.length - 1] || null;
@@ -164,7 +159,7 @@ export const fetchComments = async (
   lastComment?: DocumentSnapshot,
   pageSize: number = 10
 ): Promise<{ comments: Comment[]; lastVisible: DocumentSnapshot | null }> => {
-  console.log("Fetching comments for artworkId:", artworkId); // Debug log
+  console.log("Fetching comments for artworkId:", artworkId);
   const commentsRef = collection(firestore, `artworks/${artworkId}/comments`);
 
   let commentsQuery = query(
@@ -195,11 +190,11 @@ export const fetchComments = async (
     const lastVisible =
       commentSnapshots.docs[commentSnapshots.docs.length - 1] || null;
 
-    console.log("Fetched comments:", comments); // Log fetched comments
-    console.log("Last visible document:", lastVisible); // Log last visible doc for pagination
+    console.log("Fetched comments:", comments);
+    console.log("Last visible document:", lastVisible);
     return { comments, lastVisible };
   } catch (error) {
-    console.error("Error fetching comments:", error); // Log error if any
+    console.error("Error fetching comments:", error);
     throw new Error("Failed to fetch comments. Please try again.");
   }
 };
@@ -250,7 +245,7 @@ export const deleteComment = async (artworkId: string, commentId: string) => {
       `artworks/${artworkId}/comments`,
       commentId
     );
-    await deleteDoc(commentRef); // This will permanently delete the document
+    await deleteDoc(commentRef);
     console.log("Comment deleted successfully");
   } catch (error) {
     console.error("Error deleting comment:", error);
@@ -259,7 +254,6 @@ export const deleteComment = async (artworkId: string, commentId: string) => {
 };
 
 // Sample data
-
 const sampleArtwork = {
   title: "Starry Night",
   description: "An iconic painting by Vincent van Gogh.",

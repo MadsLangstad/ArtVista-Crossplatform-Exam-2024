@@ -1,10 +1,23 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Modal } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+  Image,
+  Alert,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
 
 interface EditProfileModalProps {
   modalVisible: boolean;
   setModalVisible: (visible: boolean) => void;
-  saveProfile: (profile: { username: string; bio: string }) => void;
+  saveProfile: (profile: {
+    username: string;
+    bio: string;
+    profileImageUrl: string;
+  }) => void;
 }
 
 export default function EditProfileModal({
@@ -14,11 +27,45 @@ export default function EditProfileModal({
 }: EditProfileModalProps) {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   const handleSave = () => {
-    // Pass the updated data back to parent or handle here
-    saveProfile({ username, bio });
+    saveProfile({ username, bio, profileImageUrl: profileImage || "" });
     setModalVisible(false);
+  };
+
+  const pickProfileImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Denied", "We need camera roll permissions!");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setProfileImage(result.assets[0].uri);
+    }
+  };
+
+  const takeProfileImageWithCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Denied", "We need camera permissions!");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setProfileImage(result.assets[0].uri);
+    }
   };
 
   return (
@@ -33,14 +80,33 @@ export default function EditProfileModal({
           <Text className="text-xl font-bold text-center mb-4 text-[#E91E63]">
             Edit Profile
           </Text>
-
+          <TouchableOpacity onPress={pickProfileImage} className="mb-4">
+            {profileImage ? (
+              <Image
+                source={{ uri: profileImage }}
+                className="w-24 h-24 rounded-full self-center"
+                resizeMode="cover"
+              />
+            ) : (
+              <Text className="text-center text-blue-500">
+                Select Profile Image from Library
+              </Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={takeProfileImageWithCamera}
+            className="mb-4"
+          >
+            <Text className="text-center text-blue-500">
+              Take Profile Image with Camera
+            </Text>
+          </TouchableOpacity>
           <TextInput
             placeholder="Username"
             value={username}
             onChangeText={setUsername}
             className="bg-gray-200 dark:bg-black text-black dark:text-white border-2 border-[#E91E63] p-3 rounded-lg mb-4"
           />
-
           <TextInput
             placeholder="Bio"
             value={bio}
@@ -48,7 +114,6 @@ export default function EditProfileModal({
             className="bg-gray-200 dark:bg-black text-black dark:text-white border-2 border-[#E91E63] p-3 rounded-lg mb-4"
             multiline
           />
-
           <View className="flex-row justify-between px-10">
             <TouchableOpacity
               onPress={() => setModalVisible(false)}
@@ -56,7 +121,6 @@ export default function EditProfileModal({
             >
               <Text className="text-white text-lg">Close</Text>
             </TouchableOpacity>
-
             <TouchableOpacity
               onPress={handleSave}
               className="bg-blue-700 rounded-lg flex justify-center items-center p-3 w-1/3"

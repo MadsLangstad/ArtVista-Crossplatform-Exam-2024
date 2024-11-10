@@ -6,8 +6,9 @@ import {
   createUserWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { auth, database } from "@/services/firebaseConfig";
-import { ref, set } from "firebase/database";
+import { auth } from "@/services/firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
+import { firestore } from "@/services/firebaseService";
 
 interface AuthContextType {
   user: User | null;
@@ -50,8 +51,8 @@ export function useAuth(): AuthContextType {
       );
       const user = userCredential.user;
 
-      // Store the username in Realtime Database
-      await set(ref(database, `users/${user.uid}`), {
+      // Store the username in Firestore
+      await setDoc(doc(firestore, "users", user.uid), {
         username,
         email,
       });

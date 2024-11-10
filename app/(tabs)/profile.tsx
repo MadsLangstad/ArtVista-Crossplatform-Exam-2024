@@ -10,13 +10,13 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import { addArtworkDetails } from "@/services/firebaseService";
+import { addArtworkDetails, firestore } from "@/services/firebaseService";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
-import { storage, database } from "@/services/firebaseConfig";
-import { get, set, ref as dbRef } from "firebase/database"; // Import database functions
+import { storage } from "@/services/firebaseConfig";
 import ProfileHeader from "@/components/ProfileHeader";
 import ImagePickerModal from "@/components/ImagePickerModal";
 import EditProfileModal from "@/components/EditProfileModal";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export default function Profile() {
   const { user, logOut } = useAuth();
@@ -27,26 +27,123 @@ export default function Profile() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
+  const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [refresh, setRefresh] = useState(false); // New refresh state
 
-  // Fetch username from the database
   useEffect(() => {
-    const fetchUsername = async () => {
+    const fetchUserProfile = async () => {
       if (user) {
-        try {
-          const usernameRef = dbRef(database, `users/${user.uid}/username`);
-          const snapshot = await get(usernameRef);
-          if (snapshot.exists()) {
-            setUsername(snapshot.val());
-          } else {
-            console.warn("No username found in the database for this user.");
-          }
-        } catch (error) {
-          console.error("Error fetching username:", error);
+        const userDoc = await getDoc(doc(firestore, "users", user.uid));
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setUsername(data.username || "");
+          setBio(data.bio || "");
+          setProfileImageUrl(
+            data.profileImageUrl || "https://via.placeholder.com/150"
+          );
         }
       }
     };
-    fetchUsername();
-  }, [user]);
+    fetchUserProfile();
+  }, [user, refresh]);
+
+  const handleUpload = async () => {
+    if (!selectedImage || !title || !description) {
+      alert("Please fill out all fields and select an image!");
+      return;
+    }
+    if (!user) {
+      alert("User not authenticated!");
+      return;
+    }
+    setIsUploading(true);
+    try {
+      const response = await fetch(selectedImage);
+      const blob = await response.blob();
+      const fileName = `${user.uid}_${Date.now()}.jpg`;
+      const storageRef = ref(storage, `artwork-images/${fileName}`);
+      await uploadBytesResumable(storageRef, blob);
+      const downloadURL = await getDownloadURL(storageRef);
+      await addArtworkDetails({
+        title,
+        description,
+        imageUrl: downloadURL,
+        artist: username || "Anonymous Artist",
+        year: new Date().getFullYear(),
+        hashtags: [],
+        artistId: user.uid,
+        uploadDate: new Date().toISOString(),
+        exhibitionInfo: {
+          location: "",
+          date: "",
+        },
+        upvote: 0,
+        downvote: 0,
+      });
+      alert("Image uploaded successfully!");
+      setTitle("");
+      setDescription("");
+      setSelectedImage(null);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      alert("Failed to upload image. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const saveProfile = async ({
+    username,
+    bio,
+    profileImageUrl,
+  }: {
+    username: string;
+    bio: string;
+    profileImageUrl: string;
+  }) => {
+    if (user) {
+      try {
+        let updatedImageUrl = profileImageUrl;
+
+        if (profileImageUrl && !profileImageUrl.startsWith("https://")) {
+          const response = await fetch(profileImageUrl);
+          const blob = await response.blob();
+          const fileName = `profile-images/${user.uid}_${Date.now()}.jpg`;
+          const storageRef = ref(storage, fileName);
+          const uploadTask = uploadBytesResumable(storageRef, blob);
+
+          await new Promise((resolve, reject) => {
+            uploadTask.on("state_changed", null, reject, async () => {
+              updatedImageUrl = await getDownloadURL(storageRef);
+              resolve(updatedImageUrl);
+            });
+          });
+        }
+
+        // Update Firestore with the new profile data
+        await setDoc(
+          doc(firestore, "users", user.uid),
+          {
+            username,
+            bio,
+            profileImageUrl: updatedImageUrl,
+            email: user.email,
+          },
+          { merge: true }
+        );
+
+        setUsername(username);
+        setBio(bio);
+        setProfileImageUrl(updatedImageUrl);
+        setRefresh((prev) => !prev);
+        alert("Profile updated successfully!");
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        alert("Failed to update profile. Please try again.");
+      }
+    }
+  };
 
   const pickImageFromLibrary = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -84,75 +181,6 @@ export default function Profile() {
     }
   };
 
-  const handleUpload = async () => {
-    if (!selectedImage || !title || !description) {
-      alert("Please fill out all fields and select an image!");
-      return;
-    }
-    if (!user) {
-      alert("User not authenticated!");
-      return;
-    }
-    setIsUploading(true);
-    try {
-      const response = await fetch(selectedImage);
-      const blob = await response.blob();
-      const fileName = `${user.uid}_${Date.now()}.jpg`;
-      const storageRef = ref(storage, `artwork-images/${fileName}`);
-      await uploadBytesResumable(storageRef, blob);
-      const downloadURL = await getDownloadURL(storageRef);
-      await addArtworkDetails({
-        title,
-        description,
-        imageUrl: downloadURL,
-        artist: username || "Anonymous Artist",
-        year: new Date().getFullYear(),
-        hashtags: [],
-        artistId: user.uid,
-        uploadDate: new Date().toISOString(),
-        exhibitionInfo: {
-          location: "Default Location",
-          date: new Date().toISOString(),
-        },
-        upvote: 0,
-        downvote: 0,
-      });
-      alert("Image uploaded successfully!");
-      setTitle("");
-      setDescription("");
-      setSelectedImage(null);
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("Failed to upload image. Please try again.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const saveProfile = async ({
-    username,
-    bio,
-  }: {
-    username: string;
-    bio: string;
-  }) => {
-    if (user) {
-      try {
-        const userRef = dbRef(database, `users/${user.uid}`);
-        await set(userRef, {
-          username,
-          bio,
-          email: user.email, // Store email to maintain existing info
-        });
-        setUsername(username);
-        alert("Profile updated successfully!");
-      } catch (error) {
-        console.error("Error updating profile:", error);
-        alert("Failed to update profile. Please try again.");
-      }
-    }
-  };
-
   if (!user)
     return (
       <View className="flex-1 justify-center items-center">
@@ -171,12 +199,9 @@ export default function Profile() {
 
   return (
     <View className="flex-1 bg-white dark:bg-black p-4">
-      <ProfileHeader />
-
-      <Text className="text-2xl text-white font-bold mb-4">
-        Welcome, {username}!
+      <Text>
+        <ProfileHeader refresh={refresh} />
       </Text>
-
       <View className="mb-8 flex gap-4">
         {selectedImage && (
           <Image
@@ -216,14 +241,12 @@ export default function Profile() {
           </Text>
         </TouchableOpacity>
       </View>
-
       <ImagePickerModal
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
         pickImageFromLibrary={pickImageFromLibrary}
         takeImageWithCamera={pickImageWithCamera}
       />
-
       <View className="flex-row justify-center gap-8 w-full mt-4">
         <TouchableOpacity
           onPress={() => setEditModalVisible(true)}
@@ -239,7 +262,6 @@ export default function Profile() {
           <Text className="text-white text-lg">Log Out</Text>
         </TouchableOpacity>
       </View>
-
       <EditProfileModal
         modalVisible={editModalVisible}
         setModalVisible={setEditModalVisible}
