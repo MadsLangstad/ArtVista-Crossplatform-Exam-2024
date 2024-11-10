@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -26,7 +26,6 @@ const CommentSection: React.FC<
   const { user } = useAuth();
   const [editingComment, setEditingComment] = useState<string | null>(null);
   const [editingText, setEditingText] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const handleDelete = async (commentId: string, artworkId: string) => {
@@ -53,6 +52,21 @@ const CommentSection: React.FC<
     );
   };
 
+  const handleEdit = async (id: string, artworkId: string) => {
+    try {
+      await editComment(artworkId, id, editingText);
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment.id === id ? { ...comment, text: editingText } : comment
+        )
+      );
+      setEditingComment(null);
+      setEditingText("");
+    } catch (error) {
+      console.error("Error editing comment:", error);
+    }
+  };
+
   const onScrollEnd = async ({ nativeEvent }: { nativeEvent: any }) => {
     if (isCloseToBottom(nativeEvent)) {
       setIsLoadingMore(true);
@@ -69,119 +83,161 @@ const CommentSection: React.FC<
     layoutMeasurement: { height: number };
     contentOffset: { y: number };
     contentSize: { height: number };
-  }) => {
-    return (
-      layoutMeasurement.height + contentOffset.y >= contentSize.height - 20
-    );
-  };
-
-  const handleEdit = async (id: string, artworkId: string) => {
-    try {
-      await editComment(artworkId, id, editingText);
-      setComments((prevComments) =>
-        prevComments.map((comment) =>
-          comment.id === id ? { ...comment, text: editingText } : comment
-        )
-      );
-      setEditingComment(null);
-      setEditingText("");
-    } catch (error) {
-      console.error("Error editing comment:", error);
-    }
-  };
+  }) => layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 relative">
       <Text className="text-black dark:text-white text-xl font-bold mb-2">
         Comments
       </Text>
       <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1 mb-2"
-        onScrollEndDrag={onScrollEnd} // Trigger when scroll ends
-        scrollEventThrottle={400} // Reduce frequency of events for better performance
+        onScrollEndDrag={onScrollEnd}
+        scrollEventThrottle={400}
       >
         {comments.map((comment) => (
           <View
             key={comment.id}
-            className="mb-4 flex-row items-start px-2 rounded-lg border-b-2 border-[#E91E63]"
+            className="mb-4 flex-row items-start px-2 rounded-lg border-b-2 border-pink-500"
           >
             {comment.userId === user?.uid && (
-              <View className="flex-col items-center mr-2">
-                <TouchableOpacity
-                  onPress={() => {
-                    setEditingComment(comment.id);
-                    setEditingText(comment.text);
-                  }}
-                  style={{ marginRight: 8 }}
-                >
-                  <Icon name="pencil" size={18} color="#4CAF50" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleDelete(comment.id, comment.artworkId)}
-                  style={{ marginRight: 8 }}
-                >
-                  <Icon name="close-circle" size={18} color="#f44336" />
-                </TouchableOpacity>
-              </View>
+              <CommentActions
+                comment={comment}
+                setEditingComment={setEditingComment}
+                setEditingText={setEditingText}
+                handleDelete={handleDelete}
+              />
             )}
-            <View style={{ flex: 1 }}>
+            <View className="flex-1">
               <Text className="font-bold text-gray-900 dark:text-gray-300 mb-1">
                 {comment.author}:
               </Text>
               {editingComment === comment.id ? (
-                <TextInput
-                  value={editingText}
-                  onChangeText={setEditingText}
-                  placeholder="Edit your comment..."
-                  className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-2 rounded-lg mb-1"
+                <EditCommentInput
+                  editingText={editingText}
+                  setEditingText={setEditingText}
+                  handleEdit={() => handleEdit(comment.id, comment.artworkId)}
+                  cancelEdit={() => {
+                    setEditingComment(null);
+                    setEditingText("");
+                  }}
                 />
               ) : (
                 <Text className="text-gray-800 dark:text-gray-400 mb-1">
                   {comment.text}
                 </Text>
               )}
-              {editingComment === comment.id && (
-                <View className="flex-row mt-2">
-                  <TouchableOpacity
-                    onPress={() => handleEdit(comment.id, comment.artworkId)}
-                    className="bg-green-600 p-2 rounded-lg"
-                  >
-                    <Text className="text-white">Save</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setEditingComment(null);
-                      setEditingText("");
-                    }}
-                    className="bg-gray-600 p-2 rounded-lg ml-2"
-                  >
-                    <Text className="text-white">Cancel</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
             </View>
           </View>
         ))}
-        {isLoadingMore && <ActivityIndicator size="small" color="#E91E63" />}
       </ScrollView>
-      <View className="absolute bottom-0 left-0 right-0 bg-white dark:bg-black p-4 border-t border-gray-200 dark:border-gray-800">
-        <TextInput
-          value={commentText}
-          onChangeText={setCommentText}
-          placeholder="Write a comment..."
-          placeholderTextColor="#888"
-          className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-3 rounded-lg mb-2"
-        />
-        <TouchableOpacity
-          onPress={handleAddComment}
-          className="bg-blue-700 p-3 rounded-lg"
+      {isLoadingMore && (
+        <View
+          className="absolute inset-x-0 bottom-44 items-center"
+          style={{ zIndex: 10 }}
         >
-          <Text className="text-white text-center">Add Comment</Text>
-        </TouchableOpacity>
-      </View>
+          <ActivityIndicator size="large" color="#E91E63" />
+        </View>
+      )}
+      <CommentInput
+        commentText={commentText}
+        setCommentText={setCommentText}
+        handleAddComment={handleAddComment}
+      />
     </View>
   );
 };
+
+const CommentActions = ({
+  comment,
+  setEditingComment,
+  setEditingText,
+  handleDelete,
+}: {
+  comment: Comment;
+  setEditingComment: (id: string | null) => void;
+  setEditingText: (text: string) => void;
+  handleDelete: (commentId: string, artworkId: string) => void;
+}) => (
+  <View className="flex-col items-center mr-2">
+    <TouchableOpacity
+      onPress={() => {
+        setEditingComment(comment.id);
+        setEditingText(comment.text);
+      }}
+      className="mr-2"
+    >
+      <Icon name="pencil" size={18} color="#4CAF50" />
+    </TouchableOpacity>
+    <TouchableOpacity
+      onPress={() => handleDelete(comment.id, comment.artworkId)}
+      className="mr-2"
+    >
+      <Icon name="close-circle" size={18} color="#f44336" />
+    </TouchableOpacity>
+  </View>
+);
+
+const EditCommentInput = ({
+  editingText,
+  setEditingText,
+  handleEdit,
+  cancelEdit,
+}: {
+  editingText: string;
+  setEditingText: (text: string) => void;
+  handleEdit: () => void;
+  cancelEdit: () => void;
+}) => (
+  <View>
+    <TextInput
+      value={editingText}
+      onChangeText={setEditingText}
+      placeholder="Edit your comment..."
+      className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-2 rounded-lg mb-1"
+    />
+    <View className="flex-row mt-2">
+      <TouchableOpacity
+        onPress={handleEdit}
+        className="bg-green-600 p-2 rounded-lg"
+      >
+        <Text className="text-white">Save</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={cancelEdit}
+        className="bg-gray-600 p-2 rounded-lg ml-2"
+      >
+        <Text className="text-white">Cancel</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+);
+
+const CommentInput = ({
+  commentText,
+  setCommentText,
+  handleAddComment,
+}: {
+  commentText: string;
+  setCommentText: (text: string) => void;
+  handleAddComment: () => void;
+}) => (
+  <View className="absolute bottom-0 left-0 right-0 bg-white dark:bg-black p-4 border-t border-gray-200 dark:border-gray-800">
+    <TextInput
+      value={commentText}
+      onChangeText={setCommentText}
+      placeholder="Write a comment..."
+      placeholderTextColor="#888"
+      className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-3 rounded-lg mb-2"
+    />
+    <TouchableOpacity
+      onPress={handleAddComment}
+      className="bg-blue-700 p-3 rounded-lg"
+    >
+      <Text className="text-white text-center">Add Comment</Text>
+    </TouchableOpacity>
+  </View>
+);
 
 export default CommentSection;

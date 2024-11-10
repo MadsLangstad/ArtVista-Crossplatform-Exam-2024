@@ -11,7 +11,7 @@ export default function ProfileHeader() {
     <View className="flex-row justify-between items-center mb-8">
       <View>
         <Text className="text-black dark:text-white text-2xl font-bold">
-          {user.email}
+          {user.displayName}
         </Text>
         <Text className="text-gray-800 dark:text-gray-400 text-lg">
           {user.email}

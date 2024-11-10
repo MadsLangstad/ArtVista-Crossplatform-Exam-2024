@@ -49,9 +49,15 @@ export default function Gallery() {
         lastVisible: newLastVisible,
       } = await fetchArtworks(refresh ? null : lastVisible);
 
-      setArtworks(
-        refresh ? fetchedArtworks : [...artworks, ...fetchedArtworks]
+      // Filter out duplicate items
+      const uniqueArtworks = [
+        ...(refresh ? [] : artworks),
+        ...fetchedArtworks,
+      ].filter(
+        (item, index, self) => index === self.findIndex((t) => t.id === item.id)
       );
+
+      setArtworks(uniqueArtworks);
       setLastVisible(newLastVisible); // Update the last visible item
     } catch (error) {
       console.error("Error fetching artworks:", error);
@@ -120,7 +126,7 @@ export default function Gallery() {
         keyExtractor={(item) => item.id}
         numColumns={1}
         showsVerticalScrollIndicator={false}
-        style={styles.container}
+        className="pt-4 mb-10"
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true }
@@ -135,7 +141,7 @@ export default function Gallery() {
         }
         ListFooterComponent={
           loading && !refreshing ? (
-            <View style={styles.footerLoader}>
+            <View className="px-5">
               <ActivityIndicator size="large" color="#E91E63" />
             </View>
           ) : null
@@ -144,22 +150,6 @@ export default function Gallery() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingTop: 10,
-    paddingBottom: 16,
-    minHeight: screenHeight,
-  },
-  searchBar: {
-    borderColor: "#E91E63",
-    color: "#E91E63",
-    width: 275,
-  },
-  footerLoader: {
-    paddingVertical: 20,
-  },
-});
 
 const Loader = () => (
   <View className="center-loader">
