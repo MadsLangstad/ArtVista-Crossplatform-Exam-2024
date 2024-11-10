@@ -49,7 +49,7 @@ export default function EditProfileModal({
             multiline
           />
 
-          <View className="flex-row justify-between">
+          <View className="flex-row justify-between px-10">
             <TouchableOpacity
               onPress={() => setModalVisible(false)}
               className="bg-blue-700 rounded-lg flex justify-center items-center p-3 w-1/3"

@@ -6,13 +6,14 @@ import {
   createUserWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { auth } from "@/services/firebaseConfig";
+import { auth, database } from "@/services/firebaseConfig";
+import { ref, set } from "firebase/database";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, username: string) => Promise<void>;
   logOut: () => Promise<void>;
 }
 
@@ -39,10 +40,23 @@ export function useAuth(): AuthContextType {
     }
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      // Store the username in Realtime Database
+      await set(ref(database, `users/${user.uid}`), {
+        username,
+        email,
+      });
+
+      setUser(user);
     } catch (error) {
       console.error("Error signing up:", error);
     } finally {

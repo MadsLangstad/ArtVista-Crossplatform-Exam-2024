@@ -12,10 +12,11 @@ import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { addArtworkDetails } from "@/services/firebaseService";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
-import { storage } from "@/services/firebaseConfig";
+import { storage, database } from "@/services/firebaseConfig";
+import { get, set, ref as dbRef } from "firebase/database"; // Import database functions
 import ProfileHeader from "@/components/ProfileHeader";
 import ImagePickerModal from "@/components/ImagePickerModal";
-import EditProfileModal from "@/components/EditProfileModal"; // Import the new modal
+import EditProfileModal from "@/components/EditProfileModal";
 
 export default function Profile() {
   const { user, logOut } = useAuth();
@@ -24,7 +25,28 @@ export default function Profile() {
   const [description, setDescription] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editModalVisible, setEditModalVisible] = useState(false); // New state for EditProfileModal
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [username, setUsername] = useState("");
+
+  // Fetch username from the database
+  useEffect(() => {
+    const fetchUsername = async () => {
+      if (user) {
+        try {
+          const usernameRef = dbRef(database, `users/${user.uid}/username`);
+          const snapshot = await get(usernameRef);
+          if (snapshot.exists()) {
+            setUsername(snapshot.val());
+          } else {
+            console.warn("No username found in the database for this user.");
+          }
+        } catch (error) {
+          console.error("Error fetching username:", error);
+        }
+      }
+    };
+    fetchUsername();
+  }, [user]);
 
   const pickImageFromLibrary = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -44,13 +66,14 @@ export default function Profile() {
     }
   };
 
-  const takeImageWithCamera = async () => {
+  const pickImageWithCamera = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== "granted") {
       Alert.alert("Permission Denied", "We need camera permissions!");
       return;
     }
     const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -82,7 +105,7 @@ export default function Profile() {
         title,
         description,
         imageUrl: downloadURL,
-        artist: user.displayName || "Anonymous Artist",
+        artist: username || "Anonymous Artist",
         year: new Date().getFullYear(),
         hashtags: [],
         artistId: user.uid,
@@ -106,10 +129,28 @@ export default function Profile() {
     }
   };
 
-  const saveProfile = (data: any) => {
-    // Placeholder for profile update logic
-    console.log("Save profile with data:", data);
-    // You can add Firebase update logic here or other state updates
+  const saveProfile = async ({
+    username,
+    bio,
+  }: {
+    username: string;
+    bio: string;
+  }) => {
+    if (user) {
+      try {
+        const userRef = dbRef(database, `users/${user.uid}`);
+        await set(userRef, {
+          username,
+          bio,
+          email: user.email, // Store email to maintain existing info
+        });
+        setUsername(username);
+        alert("Profile updated successfully!");
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        alert("Failed to update profile. Please try again.");
+      }
+    }
   };
 
   if (!user)
@@ -131,6 +172,10 @@ export default function Profile() {
   return (
     <View className="flex-1 bg-white dark:bg-black p-4">
       <ProfileHeader />
+
+      <Text className="text-2xl text-white font-bold mb-4">
+        Welcome, {username}!
+      </Text>
 
       <View className="mb-8 flex gap-4">
         {selectedImage && (
@@ -176,7 +221,7 @@ export default function Profile() {
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
         pickImageFromLibrary={pickImageFromLibrary}
-        takeImageWithCamera={takeImageWithCamera}
+        takeImageWithCamera={pickImageWithCamera}
       />
 
       <View className="flex-row justify-center gap-8 w-full mt-4">

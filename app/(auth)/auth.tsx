@@ -10,8 +10,8 @@ export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState(""); // New state for username
   const [loading, setLoading] = useState(false);
-  const [username, setUsername] = useState("");
   const colorScheme = useColorScheme();
 
   useEffect(() => {
@@ -21,8 +21,8 @@ export default function Auth() {
   }, [user]);
 
   const handleAuth = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password.");
+    if (!email || !password || (!isLogin && !username)) {
+      Alert.alert("Error", "Please fill out all required fields.");
       return;
     }
 
@@ -30,10 +30,8 @@ export default function Auth() {
     try {
       if (isLogin) {
         await signIn(email, password);
-        router.push("/(tabs)/profile");
       } else {
-        await signUp(email, password);
-        router.push("/(tabs)/profile");
+        await signUp(email, password, username); // Pass username to signUp
       }
     } catch (error) {
       const errorMessage =
@@ -103,9 +101,16 @@ export default function Auth() {
         isLoggedIn={isLogin}
         onLogin={handleAuth}
         onSignup={handleAuth}
+        loading={loading} // Add loading state to show a spinner if needed
       />
 
-      <TouchableOpacity onPress={() => setIsLogin(!isLogin)} className="mt-4">
+      <TouchableOpacity
+        onPress={() => {
+          setIsLogin(!isLogin);
+          setUsername(""); // Clear username when toggling
+        }}
+        className="mt-4"
+      >
         <Text className="dark:text-lightblue-500 text-blue-500">
           {isLogin
             ? "Don't have an account? Sign up"

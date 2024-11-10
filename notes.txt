@@ -1,4 +1,4 @@
-Legge til splashscreen som blir det første man ser, varer i 3-6 sekunder så fader den ut.
-Fikse feilen som oppstår når man går fra gallery.tsx til profile.tsx, den går til login(auth.tsx) iblandt selvom man er logget inn.
-Når man logger inn skal man komme til profile.tsx med en gang, ikke bli værende på login(auth.tsx).
 Fikse så alle knapper er like.
+Fikse oppdatering og visning av brukernavn i profil.
+Fiksa Google login/signup
+Fikse farger light/dark
