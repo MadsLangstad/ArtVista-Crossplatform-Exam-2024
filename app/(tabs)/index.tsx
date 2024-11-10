@@ -7,24 +7,15 @@ import {
   Animated,
   Dimensions,
   RefreshControl,
-  StyleSheet,
+  TextInput,
 } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
-import { TextInput } from "react-native";
 import { router } from "expo-router";
 import { ArtworkItemProps } from "@/types/galleryTypes";
 import { fetchArtworks } from "@/services/firebaseService";
 import ArtworkItem from "@/components/ArtWorkItem";
 import { useAuth } from "@/hooks/useAuth";
 import { DocumentSnapshot } from "firebase/firestore";
-
-const headerTranslateYConfig: Animated.InterpolationConfigType = {
-  inputRange: [0, 10],
-  outputRange: [0, -55],
-  extrapolate: "clamp" as const,
-};
-
-const { height: screenHeight } = Dimensions.get("window");
 
 export default function Gallery() {
   const [artworks, setArtworks] = useState<ArtworkItemProps[]>([]);
@@ -38,7 +29,7 @@ export default function Gallery() {
     try {
       if (refresh) {
         setRefreshing(true);
-        setLastVisible(null); // Reset lastVisible on refresh
+        setLastVisible(null);
       } else {
         setLoading(true);
       }
@@ -49,7 +40,6 @@ export default function Gallery() {
         lastVisible: newLastVisible,
       } = await fetchArtworks(refresh ? null : lastVisible);
 
-      // Filter out duplicate items
       const uniqueArtworks = [
         ...(refresh ? [] : artworks),
         ...fetchedArtworks,
@@ -58,7 +48,7 @@ export default function Gallery() {
       );
 
       setArtworks(uniqueArtworks);
-      setLastVisible(newLastVisible); // Update the last visible item
+      setLastVisible(newLastVisible);
     } catch (error) {
       console.error("Error fetching artworks:", error);
     } finally {
@@ -90,34 +80,43 @@ export default function Gallery() {
     <ArtworkItem item={item} handlePress={handleArtworkPress} />
   );
 
-  if (loading && !refreshing) {
-    return <Loader />;
-  }
-
-  const headerTranslateY = scrollY.interpolate(headerTranslateYConfig);
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, 100], // Scroll distance of 100 will translate header by 200
+    outputRange: [0, -200], // Moves up 2x times the scroll distance
+    extrapolate: "clamp",
+  });
 
   return (
-    <View className="flex dark:bg-black p-4">
+    <View className="flex-1 light:bg-white dark:bg-black">
+      {/* Header that will be animated out of view */}
       <Animated.View
-        style={{ transform: [{ translateY: headerTranslateY }] }}
-        className="flex justify-between flex-row"
+        style={{
+          transform: [{ translateY: headerTranslateY }],
+          zIndex: 1,
+          position: "absolute",
+          top: 10,
+          left: 0,
+          right: 0,
+          paddingHorizontal: 10,
+        }}
       >
-        <TextInput
-          className="border-2 border-pink-700 text-pink-700 px-2 font-semibold rounded-lg w-3/4"
-          placeholder="Search for specific artwork"
-        />
-
-        <TouchableOpacity
-          className="flex justify-center items-center bg-blue-700 rounded-lg px-2"
-          onPress={() => {
-            Alert.alert(
-              "Search",
-              "Search functionality is not implemented yet."
-            );
-          }}
-        >
-          <Text className="text-lg p-2 font-semibold text-white">Search</Text>
-        </TouchableOpacity>
+        <View className="flex-row justify-between items-center">
+          <TextInput
+            className="border-2 border-pink-700 text-pink-700 px-2 py-2.5 font-semibold rounded-lg flex-1 mr-2"
+            placeholder="Search for specific artwork"
+          />
+          <TouchableOpacity
+            className="flex justify-center items-center bg-blue-700 rounded-lg px-4 py-2"
+            onPress={() => {
+              Alert.alert(
+                "Search",
+                "Search functionality is not implemented yet."
+              );
+            }}
+          >
+            <Text className="text-lg font-semibold text-white">Search</Text>
+          </TouchableOpacity>
+        </View>
       </Animated.View>
 
       <Animated.FlatList
@@ -125,8 +124,9 @@ export default function Gallery() {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         numColumns={1}
+        style={{ paddingHorizontal: 10 }}
         showsVerticalScrollIndicator={false}
-        className="pt-4 mb-10"
+        contentContainerStyle={{ paddingTop: 60 }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true }
@@ -137,11 +137,12 @@ export default function Gallery() {
             onRefresh={refreshArtworksData}
             colors={["#E91E63"]}
             tintColor="#E91E63"
+            progressViewOffset={40}
           />
         }
         ListFooterComponent={
           loading && !refreshing ? (
-            <View className="px-5">
+            <View className="px-5 py-5">
               <ActivityIndicator size="large" color="#E91E63" />
             </View>
           ) : null
@@ -152,7 +153,7 @@ export default function Gallery() {
 }
 
 const Loader = () => (
-  <View className="center-loader">
+  <View className="flex-1 justify-center items-center">
     <ActivityIndicator size="large" color="#E91E63" />
   </View>
 );

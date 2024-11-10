@@ -9,7 +9,7 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
   return (
     <TouchableOpacity
       onPress={() => handlePress(item)}
-      className="mb-6 z-10 rounded-lg bg-white dark:bg-slate-900 shadow-md w-full border-2 border-[#E91E63]"
+      className="mb-6 rounded-lg bg-white dark:bg-slate-900 shadow-md w-full border-2 border-[#E91E63]"
       style={{ elevation: 3 }}
     >
       <View className="w-full h-48 bg-gray-200 dark:bg-slate-800 rounded-lg overflow-hidden relative">

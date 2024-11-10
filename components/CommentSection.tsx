@@ -137,7 +137,7 @@ const CommentSection: React.FC<
           className="absolute inset-x-0 bottom-44 items-center"
           style={{ zIndex: 10 }}
         >
-          <ActivityIndicator size="large" color="#E91E63" />
+          <ActivityIndicator size="small" color="#E91E63" />
         </View>
       )}
       <CommentInput
@@ -223,17 +223,17 @@ const CommentInput = ({
   setCommentText: (text: string) => void;
   handleAddComment: () => void;
 }) => (
-  <View className="absolute bottom-0 left-0 right-0 bg-white dark:bg-black p-4 border-t border-gray-200 dark:border-gray-800">
+  <View className="absolute bottom-0 left-0 right-0 dark:bg-black py-4 dark:border-gray-800">
     <TextInput
       value={commentText}
       onChangeText={setCommentText}
       placeholder="Write a comment..."
       placeholderTextColor="#888"
-      className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-3 rounded-lg mb-2"
+      className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-3 rounded-lg mb-2.5 border-2 border-[#E91E63]"
     />
     <TouchableOpacity
       onPress={handleAddComment}
-      className="bg-blue-700 p-3 rounded-lg"
+      className="bg-blue-700 py-3 rounded-lg"
     >
       <Text className="text-white text-center">Add Comment</Text>
     </TouchableOpacity>

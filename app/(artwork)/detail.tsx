@@ -42,7 +42,7 @@ export default function Detail() {
             await fetchComments(Array.isArray(id) ? id[0] : id);
           setComments(fetchedComments);
           setLastComment(lastVisible);
-          console.log("Initial comments loaded:", fetchedComments); // Log fetched comments
+          console.log("Initial comments loaded:", fetchedComments);
         } catch (error) {
           console.error("Error loading initial comments:", error);
         }
@@ -186,7 +186,6 @@ export default function Detail() {
           </View>
         </View>
 
-        {/* Artwork Details Code */}
         <CommentSection
           comments={comments}
           commentText={commentText}
