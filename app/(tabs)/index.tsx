@@ -1,11 +1,9 @@
 import {
   ActivityIndicator,
-  Alert,
   Text,
   TouchableOpacity,
   View,
   Animated,
-  Dimensions,
   RefreshControl,
   TextInput,
 } from "react-native";
@@ -22,10 +20,11 @@ export default function Gallery() {
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [lastVisible, setLastVisible] = useState<DocumentSnapshot | null>(null);
-  const { user } = useAuth();
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  const fetchArtworksData = async (refresh = false) => {
+  const fetchArtworksData = async (refresh = false, query = "") => {
     try {
       if (refresh) {
         setRefreshing(true);
@@ -47,7 +46,13 @@ export default function Gallery() {
         (item, index, self) => index === self.findIndex((t) => t.id === item.id)
       );
 
-      setArtworks(uniqueArtworks);
+      const filteredArtworks = query
+        ? uniqueArtworks.filter((artwork) =>
+            artwork.title.toLowerCase().includes(query.toLowerCase())
+          )
+        : uniqueArtworks;
+
+      setArtworks(filteredArtworks);
       setLastVisible(newLastVisible);
     } catch (error) {
       console.error("Error fetching artworks:", error);
@@ -67,19 +72,22 @@ export default function Gallery() {
     router.push(`/(artwork)/detail?id=${artwork.id}`);
   };
 
+  const handleSearch = () => {
+    fetchArtworksData(true, searchQuery);
+  };
+
   const renderItem = ({ item }: { item: ArtworkItemProps }) => (
     <ArtworkItem item={item} handlePress={handleArtworkPress} />
   );
 
   const headerTranslateY = scrollY.interpolate({
-    inputRange: [0, 100], // Scroll distance of 100 will translate header by 200
-    outputRange: [0, -200], // Moves up 2x times the scroll distance
+    inputRange: [0, 100],
+    outputRange: [0, -200],
     extrapolate: "clamp",
   });
 
   return (
     <View className="flex-1 light:bg-white dark:bg-black">
-      {/* Header that will be animated out of view */}
       <Animated.View
         style={{
           transform: [{ translateY: headerTranslateY }],
@@ -95,15 +103,12 @@ export default function Gallery() {
           <TextInput
             className="border-2 border-pink-700 px-2 dark:text-white py-2.5 font-semibold rounded-lg flex-1 mr-2"
             placeholder="Search for specific artwork"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
           />
           <TouchableOpacity
             className="flex justify-center items-center bg-blue-700 rounded-lg px-4 py-2"
-            onPress={() => {
-              Alert.alert(
-                "Search",
-                "Search functionality is not implemented yet."
-              );
-            }}
+            onPress={handleSearch}
           >
             <Text className="text-lg font-semibold text-white">Search</Text>
           </TouchableOpacity>
@@ -142,9 +147,3 @@ export default function Gallery() {
     </View>
   );
 }
-
-const Loader = () => (
-  <View className="flex-1 justify-center items-center">
-    <ActivityIndicator size="large" color="#E91E63" />
-  </View>
-);
