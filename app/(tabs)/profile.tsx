@@ -29,7 +29,7 @@ export default function Profile() {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [profileImageUrl, setProfileImageUrl] = useState("");
-  const [refresh, setRefresh] = useState(false); // New refresh state
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -121,7 +121,6 @@ export default function Profile() {
           });
         }
 
-        // Update Firestore with the new profile data
         await setDoc(
           doc(firestore, "users", user.uid),
           {
@@ -183,16 +182,23 @@ export default function Profile() {
 
   if (!user)
     return (
-      <View className="flex-1 justify-center items-center">
+      <View className="flex-1 justify-between items-center px-4">
+        <Image
+          source={require("@/assets/images/access-denied.png")}
+          className="w-96 h-96"
+          resizeMode="contain"
+        />
+        <Text className="text-white text-center text-lg">
+          Only logged-in users have access to the profile page. Please log in to
+          continue.
+        </Text>
         <TouchableOpacity
           onPress={() => {
             router.push("/(auth)/auth");
           }}
-          className="flex justify-center items-center border-2 border-[#00BFFF] w-28 rounded-lg mt-20"
+          className="flex justify-center items-center bg-blue-700 w-32 rounded-lg py-2 px-4 shadow-lg mb-20"
         >
-          <Text className="text-[#00BFFF] text-2xl font-semibold px-4">
-            Login
-          </Text>
+          <Text className="text-white text-xl font-semibold">Log In</Text>
         </TouchableOpacity>
       </View>
     );

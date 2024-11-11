@@ -64,16 +64,7 @@ export default function Gallery() {
   const refreshArtworksData = () => fetchArtworksData(true);
 
   const handleArtworkPress = (artwork: ArtworkItemProps) => {
-    if (!user) {
-      Alert.alert(
-        "Access Denied",
-        "Only logged-in users have access to this page."
-      );
-      router.push("/(auth)/auth");
-      return;
-    } else {
-      router.push(`/(artwork)/detail?id=${artwork.id}`);
-    }
+    router.push(`/(artwork)/detail?id=${artwork.id}`);
   };
 
   const renderItem = ({ item }: { item: ArtworkItemProps }) => (
@@ -102,7 +93,7 @@ export default function Gallery() {
       >
         <View className="flex-row justify-between items-center">
           <TextInput
-            className="border-2 border-pink-700 text-pink-700 px-2 py-2.5 font-semibold rounded-lg flex-1 mr-2"
+            className="border-2 border-pink-700 px-2 dark:text-white py-2.5 font-semibold rounded-lg flex-1 mr-2"
             placeholder="Search for specific artwork"
           />
           <TouchableOpacity

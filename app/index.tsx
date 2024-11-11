@@ -8,7 +8,7 @@ export default function SplashScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       router.push("/(tabs)/");
-    }, 10002000);
+    }, 4500);
 
     return () => clearTimeout(timer);
   }, [router]);
@@ -16,7 +16,7 @@ export default function SplashScreen() {
   return (
     <View className="flex top-32 justify-center items-center dark:bg-black px-6">
       <Image
-        source={require("../assets/images/artvista-logo.png")}
+        source={require("@/assets/images/artvista-logo.png")}
         className="w-96 h-96"
         resizeMode="contain"
       />
@@ -27,20 +27,8 @@ export default function SplashScreen() {
         </Text>
         <Text className="text-pink-500 text-lg font-semibold text-center leading-relaxed">
           Step into a world of inspiration where digital art comes alive.
-          Curated by artists for art lovers, experience the future of art
-          exhibitions today.
+          Curated by artists for art lovers ❤️
         </Text>
-
-        <TouchableOpacity
-          onPress={() => {
-            router.push("/(tabs)/");
-          }}
-          className="flex justify-center items-center border-2 border-blue-700 w-28 rounded-lg mt-20"
-        >
-          <Text className="text-blue-700 text-2xl font-semibold px-4">
-            Enter
-          </Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
