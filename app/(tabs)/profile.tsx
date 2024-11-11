@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   Text,
+  ActivityIndicator,
 } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import { router } from "expo-router";
@@ -17,6 +18,7 @@ import ProfileHeader from "@/components/ProfileHeader";
 import ImagePickerModal from "@/components/ImagePickerModal";
 import EditProfileModal from "@/components/EditProfileModal";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default function Profile() {
   const { user, logOut } = useAuth();
@@ -144,6 +146,12 @@ export default function Profile() {
     }
   };
 
+  const clearSelection = () => {
+    setSelectedImage(null);
+    setTitle("");
+    setDescription("");
+  };
+
   const pickImageFromLibrary = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -208,33 +216,49 @@ export default function Profile() {
       <Text>
         <ProfileHeader refresh={refresh} />
       </Text>
-      <View className="mb-8 flex gap-4">
-        {selectedImage && (
-          <Image
-            source={{ uri: selectedImage }}
-            className="w-full h-52 rounded-lg mb-2"
-            resizeMode="cover"
-          />
+      <View className="flex-1 mb-8">
+        {selectedImage ? (
+          <>
+            <Image
+              source={{ uri: selectedImage }}
+              className="w-full h-52 rounded-lg mb-4"
+              resizeMode="cover"
+            />
+            <TextInput
+              placeholder="Title"
+              value={title}
+              onChangeText={setTitle}
+              className="bg-gray-200 dark:bg-black text-black border-2 border-[#E91E63] dark:text-white p-3 rounded-lg mb-4"
+            />
+            <TextInput
+              placeholder="Description"
+              value={description}
+              onChangeText={setDescription}
+              className="bg-gray-200 dark:bg-black text-black border-2 border-[#E91E63] dark:text-white p-3 rounded-lg mb-2"
+              multiline
+            />
+            <View className="flex items-center justify-center">
+              <TouchableOpacity onPress={clearSelection}>
+                <Icon name="close-circle" size={35} color="#f44336" />
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          <View className="flex-1 pl-10 justify-center items-center">
+            <Image
+              source={require("@/assets/images/cat.png")}
+              className="w-full h-72 rounded-lg mb-2"
+              resizeMode="contain"
+            />
+          </View>
         )}
-        <TextInput
-          placeholder="Title"
-          value={title}
-          onChangeText={setTitle}
-          className="bg-gray-200 dark:bg-black text-black border-2 border-[#E91E63] dark:text-white p-3 rounded-lg"
-        />
-        <TextInput
-          placeholder="Description"
-          value={description}
-          onChangeText={setDescription}
-          className="bg-gray-200 dark:bg-black text-black border-2 border-[#E91E63] dark:text-white p-3 rounded-lg mb-4"
-          multiline
-        />
-
+      </View>
+      <View className="flex gap-4 justify-center w-[70%] m-auto">
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
-          className="bg-blue-700 p-3 rounded-lg"
+          className="bg-blue-700 p-3  rounded-lg"
         >
-          <Text className="text-white text-center">Add Image</Text>
+          <Text className="text-white text-center">Choose Image</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -243,30 +267,31 @@ export default function Profile() {
           className="bg-blue-700 p-3 rounded-lg"
         >
           <Text className="text-white text-center">
-            {isUploading ? "Uploading..." : "Upload Image"}
+            {isUploading ? <ActivityIndicator /> : "Upload Image"}
           </Text>
         </TouchableOpacity>
-      </View>
-      <ImagePickerModal
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-        pickImageFromLibrary={pickImageFromLibrary}
-        takeImageWithCamera={pickImageWithCamera}
-      />
-      <View className="flex-row justify-center gap-8 w-full mt-4">
-        <TouchableOpacity
-          onPress={() => setEditModalVisible(true)}
-          className="bg-blue-700 rounded-lg flex justify-center items-center p-3 w-32"
-        >
-          <Text className="text-white text-lg">Edit Profile</Text>
-        </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={logOut}
-          className="bg-[#E61E63] rounded-lg flex justify-center items-center p-3 w-32"
-        >
-          <Text className="text-white text-lg">Log Out</Text>
-        </TouchableOpacity>
+        <ImagePickerModal
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+          pickImageFromLibrary={pickImageFromLibrary}
+          takeImageWithCamera={pickImageWithCamera}
+        />
+        <View className="flex-row justify-center gap-8 w-full">
+          <TouchableOpacity
+            onPress={() => setEditModalVisible(true)}
+            className="bg-blue-700 rounded-lg flex justify-center items-center p-3 w-32"
+          >
+            <Text className="text-white text-lg">Edit Profile</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={logOut}
+            className="bg-[#E61E63] rounded-lg flex justify-center items-center p-3 w-32"
+          >
+            <Text className="text-white text-lg">Log Out</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <EditProfileModal
         modalVisible={editModalVisible}

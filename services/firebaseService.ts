@@ -19,7 +19,6 @@ import {
   orderBy,
   startAfter,
   DocumentSnapshot,
-  QueryDocumentSnapshot,
   endBefore,
 } from "firebase/firestore";
 import { app } from "./firebaseConfig";
@@ -205,17 +204,34 @@ export const addComment = async (
   userId: string
 ): Promise<string> => {
   try {
-    const comment = { text, timestamp: new Date().toISOString(), userId };
+    // Retrieve the user's profile data to get the username
+    const userDoc = await getDoc(doc(firestore, "users", userId));
+    if (!userDoc.exists()) {
+      throw new Error("User profile not found.");
+    }
+
+    const username = userDoc.data()?.username || "Anonymous";
+
+    // Create the comment object with the author's username
+    const comment = {
+      text,
+      timestamp: new Date().toISOString(),
+      userId,
+      username,
+    };
+
     const docRef = await addDoc(
       collection(firestore, `artworks/${artworkId}/comments`),
       comment
     );
     return docRef.id;
   } catch (error) {
+    console.error("Error adding comment:", error);
     throw new Error("Failed to add comment. Please try again.");
   }
 };
 
+// Function to edit a comment
 export const editComment = async (
   artworkId: string,
   commentId: string,

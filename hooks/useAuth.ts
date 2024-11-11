@@ -44,6 +44,7 @@ export function useAuth(): AuthContextType {
   const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);
     try {
+      // Create a new user with email and password
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -51,15 +52,17 @@ export function useAuth(): AuthContextType {
       );
       const user = userCredential.user;
 
-      // Store the username in Firestore
+      // Store the username and email in Firestore
       await setDoc(doc(firestore, "users", user.uid), {
         username,
-        email,
+        email: user.email,
       });
 
+      // Set the user state
       setUser(user);
     } catch (error) {
       console.error("Error signing up:", error);
+      throw new Error("Sign-up failed. Please try again.");
     } finally {
       setLoading(false);
     }

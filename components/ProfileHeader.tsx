@@ -36,25 +36,31 @@ export default function ProfileHeader({ refresh }: ProfileHeaderProps) {
   if (!user) return null;
 
   return (
-    <View className="flex-row pb-4 justify-between items-center">
-      <View>
+    <View className="flex-row pb-4 gap-6 justify-between items-center">
+      <View className="left-0">
         <Text className="text-black dark:text-white text-2xl font-bold">
           {profileData.username}
         </Text>
         {profileData.bio ? (
-          <Text className="text-gray-800 w-64 dark:text-gray-400 text-lg">
-            {profileData.bio}
+          <Text className="w-64 dark:text-white text-lg">
+            Bio:{" "}
+            <Text className="text-gray-800 dark:text-gray-400">
+              {profileData.bio}
+            </Text>
           </Text>
         ) : null}
-        <Text className="text-gray-800 dark:text-gray-400 text-lg">
-          {user.email}
+        <Text className="dark:text-white text-lg">
+          Contact:{" "}
+          <Text className="text-gray-800 dark:text-gray-400">{user.email}</Text>
         </Text>
       </View>
       <Image
-        source={{
-          uri: profileData.profileImageUrl || "https://via.placeholder.com/150",
-        }}
-        className="w-36 h-36 rounded-full"
+        source={
+          profileData.profileImageUrl
+            ? { uri: profileData.profileImageUrl }
+            : require("@/assets/images/profile.jpg")
+        }
+        className="w-36 h-36 right-0 rounded-full"
         resizeMode="cover"
       />
     </View>

@@ -229,11 +229,11 @@ const CommentInput = ({
       onChangeText={setCommentText}
       placeholder="Write a comment..."
       placeholderTextColor="#888"
-      className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-3 rounded-lg mb-2.5 border-2 border-[#E91E63]"
+      className="bg-gray-200 w-[70%] m-auto dark:bg-gray-800 text-black dark:text-white p-3 rounded-lg mb-2.5 border-2 border-[#E91E63]"
     />
     <TouchableOpacity
       onPress={handleAddComment}
-      className="bg-blue-700 py-3 rounded-lg"
+      className="bg-blue-700 w-[70%] m-auto py-3 rounded-lg"
     >
       <Text className="text-white text-center">Add Comment</Text>
     </TouchableOpacity>
