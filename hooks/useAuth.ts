@@ -9,14 +9,7 @@ import {
 import { auth } from "@/services/firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import { firestore } from "@/services/firebaseService";
-
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, username: string) => Promise<void>;
-  logOut: () => Promise<void>;
-}
+import { AuthContextType } from "@/types/authTypes";
 
 export function useAuth(): AuthContextType {
   const [user, setUser] = useState<User | null>(null);
@@ -44,7 +37,7 @@ export function useAuth(): AuthContextType {
   const signUp = async (email: string, password: string, username: string) => {
     setLoading(true);
     try {
-      // Create a new user with email and password
+      // Creating user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -52,13 +45,12 @@ export function useAuth(): AuthContextType {
       );
       const user = userCredential.user;
 
-      // Store the username and email in Firestore
+      // Storing email, username in Firestore
       await setDoc(doc(firestore, "users", user.uid), {
         username,
         email: user.email,
       });
 
-      // Set the user state
       setUser(user);
     } catch (error) {
       console.error("Error signing up:", error);

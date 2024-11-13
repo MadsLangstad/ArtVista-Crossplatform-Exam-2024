@@ -16,12 +16,20 @@ import {
 import { voteArtwork, addComment } from "@/services/firebaseService";
 import { ArtworkDetails, Comment } from "@/types/galleryTypes";
 import { useLocalSearchParams } from "expo-router";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext"; // Updated import
 import CommentSection from "@/components/CommentSection";
 import { router } from "expo-router";
-import AccessDenied from "@/components/AccessDenied";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function Detail() {
+  return (
+    <ProtectedRoute>
+      <DetailContent />
+    </ProtectedRoute>
+  );
+}
+
+function DetailContent() {
   const { id } = useLocalSearchParams();
   const { user } = useAuth();
   const [artworkDetails, setArtworkDetails] = useState<ArtworkDetails | null>(
@@ -115,10 +123,6 @@ export default function Detail() {
       }
     }
   };
-
-  if (!user) {
-    return <AccessDenied />;
-  }
 
   if (loading) {
     return (

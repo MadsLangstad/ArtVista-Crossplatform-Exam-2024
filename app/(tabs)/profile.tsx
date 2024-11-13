@@ -8,7 +8,7 @@ import {
   Text,
   ActivityIndicator,
 } from "react-native";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { addArtworkDetails, firestore } from "@/services/firebaseService";
@@ -19,9 +19,17 @@ import ImagePickerModal from "@/components/ImagePickerModal";
 import EditProfileModal from "@/components/EditProfileModal";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import AccessDenied from "@/components/AccessDenied";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function Profile() {
+  return (
+    <ProtectedRoute>
+      <ProfileContent />
+    </ProtectedRoute>
+  );
+}
+
+function ProfileContent() {
   const { user, logOut } = useAuth();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [title, setTitle] = useState("");
@@ -189,13 +197,9 @@ export default function Profile() {
     }
   };
 
-  if (!user) return <AccessDenied />;
-
   return (
     <View className="flex-1 bg-white dark:bg-black p-4">
-      <Text>
-        <ProfileHeader refresh={refresh} />
-      </Text>
+      <ProfileHeader refresh={refresh} />
       <View className="flex-1 mb-8">
         {selectedImage ? (
           <>
