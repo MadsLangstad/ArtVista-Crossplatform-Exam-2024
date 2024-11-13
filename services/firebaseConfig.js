@@ -20,6 +20,6 @@ const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage),
 });
 const storage = getStorage(app);
-const database = getDatabase(app); // Initialize Realtime Database
+const database = getDatabase(app);
 
 export { auth, app, storage, database };

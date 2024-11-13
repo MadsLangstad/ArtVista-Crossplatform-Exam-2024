@@ -1,4 +1,7 @@
 Fikse så alle knapper er like.
-Fikse oppdatering og visning av brukernavn i profil.
-Fiksa Google login/signup
-Fikse farger light/dark
+Implementere Google login/signup
+Fikse farger light/dark consistency
+fikse logikk votes, kan bare vote opp eller ned en gang.
+implementere likes og iconer for comment(antall)
+Implementere Protected routes
+Isteden for å vise en acces denied skjer i details og så en på profile, lage heller en komponent som kan brukes egge stedene

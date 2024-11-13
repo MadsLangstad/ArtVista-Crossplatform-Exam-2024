@@ -9,16 +9,7 @@ import {
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-
-interface EditProfileModalProps {
-  modalVisible: boolean;
-  setModalVisible: (visible: boolean) => void;
-  saveProfile: (profile: {
-    username: string;
-    bio: string;
-    profileImageUrl: string;
-  }) => void;
-}
+import { EditProfileModalProps } from "@/types/profileTypes";
 
 export default function EditProfileModal({
   modalVisible,

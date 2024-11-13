@@ -1,12 +1,6 @@
 import React from "react";
 import { View, Text, Modal, TouchableOpacity } from "react-native";
-
-interface ImagePickerModalProps {
-  modalVisible: boolean;
-  setModalVisible: (visible: boolean) => void;
-  pickImageFromLibrary: () => void;
-  takeImageWithCamera: () => void;
-}
+import { ImagePickerModalProps } from "@/types/profileTypes";
 
 export default function ImagePickerModal({
   modalVisible,

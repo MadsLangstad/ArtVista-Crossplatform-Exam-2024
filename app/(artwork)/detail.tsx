@@ -19,6 +19,7 @@ import { useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/hooks/useAuth";
 import CommentSection from "@/components/CommentSection";
 import { router } from "expo-router";
+import AccessDenied from "@/components/AccessDenied";
 
 export default function Detail() {
   const { id } = useLocalSearchParams();
@@ -115,27 +116,8 @@ export default function Detail() {
     }
   };
 
-  // Render the "Access Denied" screen if the user is not authenticated
   if (!user) {
-    return (
-      <View className="flex-1 justify-between items-center px-4 bg-white dark:bg-black">
-        <Image
-          source={require("@/assets/images/access-denied.png")}
-          className="w-80 h-80"
-          resizeMode="contain"
-        />
-        <Text className="text-white text-center text-lg">
-          Only logged-in users have access to the artwork details. Please log in
-          to continue.
-        </Text>
-        <TouchableOpacity
-          onPress={() => router.push("/(auth)/auth")}
-          className="flex justify-center items-center bg-blue-700 w-32 rounded-lg py-2 px-4 shadow-lg mb-40"
-        >
-          <Text className="text-white text-xl font-semibold">Log In</Text>
-        </TouchableOpacity>
-      </View>
-    );
+    return <AccessDenied />;
   }
 
   if (loading) {

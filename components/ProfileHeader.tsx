@@ -3,10 +3,7 @@ import { View, Text, Image } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import { doc, getDoc } from "firebase/firestore";
 import { firestore } from "@/services/firebaseService";
-
-interface ProfileHeaderProps {
-  refresh: boolean;
-}
+import { ProfileHeaderProps } from "@/types/profileTypes";
 
 export default function ProfileHeader({ refresh }: ProfileHeaderProps) {
   const { user } = useAuth();

@@ -19,6 +19,7 @@ import ImagePickerModal from "@/components/ImagePickerModal";
 import EditProfileModal from "@/components/EditProfileModal";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import AccessDenied from "@/components/AccessDenied";
 
 export default function Profile() {
   const { user, logOut } = useAuth();
@@ -42,7 +43,7 @@ export default function Profile() {
           setUsername(data.username || "");
           setBio(data.bio || "");
           setProfileImageUrl(
-            data.profileImageUrl || "https://via.placeholder.com/150"
+            data.profileImageUrl || require("@/assets/images/profile.jpg")
           );
         }
       }
@@ -188,28 +189,7 @@ export default function Profile() {
     }
   };
 
-  if (!user)
-    return (
-      <View className="flex-1 justify-between items-center px-4">
-        <Image
-          source={require("@/assets/images/access-denied.png")}
-          className="w-96 h-96"
-          resizeMode="contain"
-        />
-        <Text className="text-white text-center text-lg">
-          Only logged-in users have access to the profile page. Please log in to
-          continue.
-        </Text>
-        <TouchableOpacity
-          onPress={() => {
-            router.push("/(auth)/auth");
-          }}
-          className="flex justify-center items-center bg-blue-700 w-32 rounded-lg py-2 px-4 shadow-lg mb-20"
-        >
-          <Text className="text-white text-xl font-semibold">Log In</Text>
-        </TouchableOpacity>
-      </View>
-    );
+  if (!user) return <AccessDenied />;
 
   return (
     <View className="flex-1 bg-white dark:bg-black p-4">
