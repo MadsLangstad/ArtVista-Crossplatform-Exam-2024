@@ -256,13 +256,23 @@ export const editComment = async (
 
 export const deleteComment = async (artworkId: string, commentId: string) => {
   try {
+    // Reference to the specific comment
     const commentRef = doc(
       firestore,
       `artworks/${artworkId}/comments`,
       commentId
     );
+
+    // Delete the comment
     await deleteDoc(commentRef);
-    console.log("Comment deleted successfully");
+
+    // Decrement the commentsCount in the artwork document
+    const artworkRef = doc(firestore, "artworks", artworkId);
+    await updateDoc(artworkRef, {
+      commentsCount: increment(-1),
+    });
+
+    console.log("Comment deleted and commentsCount decremented successfully");
   } catch (error) {
     console.error("Error deleting comment:", error);
     throw new Error("Failed to delete comment. Please try again.");

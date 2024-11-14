@@ -2,13 +2,14 @@ export interface ArtworkItemProps {
   id: string;
   title: string;
   imageUrl: string;
+  likes: number;
+  commentsCount: number;
   description: string;
   abstract: string;
 }
 
 export interface ArtworkItemComponentProps {
   item: ArtworkItemProps;
-
   handlePress: (item: ArtworkItemProps) => void;
 }
 

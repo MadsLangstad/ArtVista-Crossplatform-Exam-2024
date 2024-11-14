@@ -1,13 +1,13 @@
+import React, { useEffect, useState, useRef } from "react";
 import {
-  ActivityIndicator,
-  Text,
-  TouchableOpacity,
   View,
+  Text,
   Animated,
   RefreshControl,
   TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import React, { useEffect, useState, useRef } from "react";
 import { router } from "expo-router";
 import { ArtworkItemProps } from "@/types/galleryTypes";
 import { fetchArtworks } from "@/services/firebaseService";

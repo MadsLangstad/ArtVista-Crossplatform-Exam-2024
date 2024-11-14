@@ -111,7 +111,7 @@ const CommentSection: React.FC<
             )}
             <View className="flex-1">
               <Text className="font-bold text-gray-900 dark:text-gray-300 mb-1">
-                {comment.author}:
+                {comment.author}
               </Text>
               {editingComment === comment.id ? (
                 <EditCommentInput

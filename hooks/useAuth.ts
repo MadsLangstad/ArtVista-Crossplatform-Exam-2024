@@ -7,18 +7,35 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth } from "@/services/firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "@/services/firebaseService";
 import { AuthContextType } from "@/types/authTypes";
 
 export function useAuth(): AuthContextType {
   const [user, setUser] = useState<User | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setUser(user);
+      setLoading(false);
+
+      if (user) {
+        // Fetch the username from Firestore
+        const userDoc = await getDoc(doc(firestore, "users", user.uid));
+        if (userDoc.exists()) {
+          setUsername(userDoc.data()?.username || ""); // Set the username
+        }
+      }
     });
     return unsubscribe;
   }, []);
@@ -71,5 +88,5 @@ export function useAuth(): AuthContextType {
     }
   };
 
-  return { user, loading, signIn, signUp, logOut };
+  return { user, loading, signIn, signUp, logOut, username };
 }
