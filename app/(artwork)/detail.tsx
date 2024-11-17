@@ -10,7 +10,6 @@ import {
 import {
   fetchComments,
   firestore,
-  voteArtwork,
   addComment,
 } from "@/services/firebaseService";
 import {
@@ -118,19 +117,16 @@ function DetailContent() {
     );
 
     try {
-      // Check if the user has already voted
       const userVoteDoc = await getDoc(userVoteRef);
 
       if (userVoteDoc.exists()) {
         const currentVoteType = userVoteDoc.data().type;
 
-        // If user is trying to vote the same way again, ignore it
         if (currentVoteType === type) {
           Alert.alert("You've already voted this way.");
           return;
         }
 
-        // If user is changing their vote, adjust the counts accordingly
         if (currentVoteType === "upvote" && type === "downvote") {
           await updateDoc(artworkRef, {
             upvote: increment(-1),
@@ -143,28 +139,17 @@ function DetailContent() {
           });
         }
 
-        // Update the user's vote in the `votes` subcollection
         await setDoc(userVoteRef, { type });
       } else {
-        // If the user hasn't voted before, add their vote
         await updateDoc(artworkRef, {
           [type]: increment(1),
         });
 
-        // Store the user's vote in the `votes` subcollection
         await setDoc(userVoteRef, { type });
-      }
-
-      // Update local state to reflect the new vote count
-      if (type === "upvote") {
-        setUpvotes((prev) => prev + (userVoteDoc.exists() ? 0 : 1));
-        if (userVoteDoc.exists()) setDownvotes((prev) => prev - 1);
-      } else {
-        setDownvotes((prev) => prev + (userVoteDoc.exists() ? 0 : 1));
-        if (userVoteDoc.exists()) setUpvotes((prev) => prev - 1);
       }
     } catch (error) {
       console.error("Error voting on artwork:", error);
+      Alert.alert("Vote Error", "Failed to cast your vote. Please try again.");
     }
   };
 
@@ -190,6 +175,10 @@ function DetailContent() {
         setCommentText("");
       } catch (error) {
         console.error("Error adding comment:", error);
+        Alert.alert(
+          "Comment Error",
+          "Failed to add comment. Please try again."
+        );
       }
     }
   };
@@ -213,19 +202,39 @@ function DetailContent() {
   }
 
   function fetchMoreComments(): Promise<void> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 1000);
+    // Implement actual fetch logic here
+    return new Promise(async (resolve) => {
+      if (lastComment) {
+        try {
+          const { comments: fetchedComments, lastVisible } =
+            await fetchComments(
+              Array.isArray(id) ? id[0] : id,
+              lastComment,
+              10
+            );
+
+          setComments((prevComments) => [
+            ...prevComments,
+            ...fetchedComments.map((comment) => ({
+              ...comment,
+              timestamp: comment.timestamp || "Unknown date",
+            })),
+          ]);
+          setLastComment(lastVisible);
+        } catch (error) {
+          console.error("Error fetching more comments:", error);
+        }
+      }
+      resolve();
     });
   }
 
   return (
     <View className="flex-1 bg-white dark:bg-black">
       <View className="flex-1 p-4">
-        <View className="relative w-full h-80 mb-4 bg-white dark:bg-black">
+        <View className="relative w-full h-80 mb-4 border-2 border-[#E61E63] rounded-lg">
           {imageLoading && (
-            <View className="center-loader">
+            <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center">
               <ActivityIndicator size="large" color="#E91E63" />
             </View>
           )}

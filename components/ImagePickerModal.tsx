@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Modal, TouchableOpacity } from "react-native";
 import { ImagePickerModalProps } from "@/types/profileTypes";
+import Button from "./Button";
 
 export default function ImagePickerModal({
   modalVisible,
@@ -21,32 +22,61 @@ export default function ImagePickerModal({
             Select an Option
           </Text>
 
-          <TouchableOpacity
+          {/* Pick Image from Library */}
+          <Button
             onPress={pickImageFromLibrary}
-            className="bg-blue-700 rounded-lg py-3 mb-4"
+            style={{
+              backgroundColor: "#007BFF",
+              borderRadius: 8,
+              paddingVertical: 12,
+              marginBottom: 16,
+            }}
+            textStyle={{
+              fontSize: 16,
+              fontWeight: "600",
+              textAlign: "center",
+              color: "white",
+            }}
           >
-            <Text className="text-center text-white font-semibold text-lg">
-              Pick Image from Library
-            </Text>
-          </TouchableOpacity>
+            <Text>Pick Image from Library</Text>
+          </Button>
 
-          <TouchableOpacity
+          {/* Take a Photo */}
+          <Button
             onPress={takeImageWithCamera}
-            className="bg-blue-700 rounded-lg py-3 mb-4"
+            style={{
+              backgroundColor: "#007BFF",
+              borderRadius: 8,
+              paddingVertical: 12,
+              marginBottom: 16,
+            }}
+            textStyle={{
+              fontSize: 16,
+              fontWeight: "600",
+              textAlign: "center",
+              color: "white",
+            }}
           >
-            <Text className="text-center text-white font-semibold text-lg">
-              Take a Photo
-            </Text>
-          </TouchableOpacity>
+            <Text>Take a Photo</Text>
+          </Button>
 
-          <TouchableOpacity
+          {/* Cancel */}
+          <Button
             onPress={() => setModalVisible(false)}
-            className="bg-gray-300 dark:bg-gray-700 rounded-lg py-3"
+            style={{
+              backgroundColor: "#D1D5DB", // Light gray background
+              borderRadius: 8,
+              paddingVertical: 12,
+            }}
+            textStyle={{
+              fontSize: 16,
+              fontWeight: "600",
+              textAlign: "center",
+              color: "black",
+            }}
           >
-            <Text className="text-center text-black dark:text-white font-semibold text-lg">
-              Cancel
-            </Text>
-          </TouchableOpacity>
+            <Text>Cancel</Text>
+          </Button>
         </View>
       </View>
     </Modal>

@@ -12,6 +12,7 @@ import { Comment, CommentSectionProps } from "@/types/galleryTypes";
 import { useAuth } from "@/hooks/useAuth";
 import { deleteComment, editComment } from "@/services/firebaseService";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import Button from "./Button";
 
 const CommentSection: React.FC<
   CommentSectionProps & { fetchMoreComments: () => Promise<void> }
@@ -161,21 +162,29 @@ const CommentActions = ({
   handleDelete: (commentId: string, artworkId: string) => void;
 }) => (
   <View className="flex-col items-center mr-2">
-    <TouchableOpacity
+    <Button
       onPress={() => {
         setEditingComment(comment.id);
         setEditingText(comment.text);
       }}
-      className="mr-2"
+      style={{
+        backgroundColor: "transparent",
+        padding: 0,
+        marginRight: 8,
+      }}
     >
       <Icon name="pencil" size={18} color="#4CAF50" />
-    </TouchableOpacity>
-    <TouchableOpacity
+    </Button>
+    <Button
       onPress={() => handleDelete(comment.id, comment.artworkId)}
-      className="mr-2"
+      style={{
+        backgroundColor: "transparent", // No background
+        padding: 0, // Remove padding
+        marginRight: 8, // Add margin
+      }}
     >
       <Icon name="close-circle" size={18} color="#f44336" />
-    </TouchableOpacity>
+    </Button>
   </View>
 );
 
@@ -198,18 +207,33 @@ const EditCommentInput = ({
       className="bg-gray-200 dark:bg-gray-800 text-black dark:text-white p-2 rounded-lg mb-1"
     />
     <View className="flex-row mt-2">
-      <TouchableOpacity
+      <Button
         onPress={handleEdit}
-        className="bg-green-600 p-2 rounded-lg"
+        style={{
+          backgroundColor: "green",
+          padding: 8,
+          borderRadius: 8,
+        }}
+        textStyle={{
+          color: "white",
+        }}
       >
-        <Text className="text-white">Save</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
+        <Text style={{ color: "white" }}>Save</Text>
+      </Button>
+      <Button
         onPress={cancelEdit}
-        className="bg-gray-600 p-2 rounded-lg ml-2"
+        style={{
+          backgroundColor: "gray",
+          padding: 8,
+          borderRadius: 8,
+          marginLeft: 8, // Adds spacing between buttons
+        }}
+        textStyle={{
+          color: "white",
+        }}
       >
-        <Text className="text-white">Cancel</Text>
-      </TouchableOpacity>
+        <Text style={{ color: "white" }}>Cancel</Text>
+      </Button>
     </View>
   </View>
 );

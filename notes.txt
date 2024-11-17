@@ -1,7 +1,7 @@
 Fikse så alle knapper er like.
 Implementere Google login/signup
 Fikse farger light/dark consistency
-Fikse voting, implementere average rating på bilder.
+implementere average rating på bilder.
 Legge til kommentarer på kompleks kode
 User feeback.
 Fikse mer kompleks search.

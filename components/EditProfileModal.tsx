@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { EditProfileModalProps } from "@/types/profileTypes";
+import Button from "./Button";
 
 export default function EditProfileModal({
   modalVisible,
@@ -71,27 +72,44 @@ export default function EditProfileModal({
           <Text className="text-xl font-bold text-center mb-4 text-[#E91E63]">
             Edit Profile
           </Text>
-          <TouchableOpacity onPress={pickProfileImage} className="mb-4">
+
+          {/* Profile Image Selector */}
+          <Button
+            onPress={pickProfileImage}
+            style={{
+              backgroundColor: "transparent", // No background
+              marginBottom: 16, // Spacing between buttons
+              justifyContent: "center",
+            }}
+          >
             {profileImage ? (
               <Image
                 source={{ uri: profileImage }}
-                className="w-24 h-24 rounded-full self-center"
+                style={{ width: 96, height: 96, borderRadius: 48 }}
                 resizeMode="cover"
               />
             ) : (
-              <Text className="text-center text-blue-500">
+              <Text style={{ color: "#007BFF", textAlign: "center" }}>
                 Select Profile Image from Library
               </Text>
             )}
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Button>
+
+          {/* Take Profile Image Button */}
+          <Button
             onPress={takeProfileImageWithCamera}
-            className="mb-4"
+            style={{
+              backgroundColor: "transparent",
+              marginBottom: 16,
+              justifyContent: "center",
+            }}
           >
-            <Text className="text-center text-blue-500">
+            <Text style={{ color: "#007BFF", textAlign: "center" }}>
               Take Profile Image with Camera
             </Text>
-          </TouchableOpacity>
+          </Button>
+
+          {/* Text Inputs */}
           <TextInput
             placeholder="Username"
             value={username}
@@ -105,19 +123,35 @@ export default function EditProfileModal({
             className="bg-gray-200 dark:bg-black text-black dark:text-white border-2 border-[#E91E63] p-3 rounded-lg mb-4"
             multiline
           />
+
+          {/* Close and Save Buttons */}
           <View className="flex-row justify-between px-10">
-            <TouchableOpacity
+            <Button
               onPress={() => setModalVisible(false)}
-              className="bg-blue-700 rounded-lg flex justify-center items-center p-3 w-1/3"
+              style={{
+                backgroundColor: "#007BFF",
+                padding: 12,
+                borderRadius: 8,
+                width: "45%",
+                justifyContent: "center",
+              }}
+              textStyle={{ color: "white", fontSize: 16 }}
             >
-              <Text className="text-white text-lg">Close</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
+              <Text style={{ color: "white", fontSize: 16 }}>Close</Text>
+            </Button>
+            <Button
               onPress={handleSave}
-              className="bg-blue-700 rounded-lg flex justify-center items-center p-3 w-1/3"
+              style={{
+                backgroundColor: "#007BFF",
+                padding: 12,
+                borderRadius: 8,
+                width: "45%",
+                justifyContent: "center",
+              }}
+              textStyle={{ color: "white", fontSize: 16 }}
             >
-              <Text className="text-white text-lg">Save</Text>
-            </TouchableOpacity>
+              <Text style={{ color: "white", fontSize: 16 }}>Save</Text>
+            </Button>
           </View>
         </View>
       </View>

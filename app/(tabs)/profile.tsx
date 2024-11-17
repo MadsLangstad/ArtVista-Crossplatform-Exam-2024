@@ -20,6 +20,7 @@ import EditProfileModal from "@/components/EditProfileModal";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Button from "@/components/Button";
 
 export default function Profile() {
   return (
@@ -353,27 +354,29 @@ function ProfileContent() {
             </Text>
           </View>
         )}
-        <TouchableOpacity
-          onPress={() => setModalVisible(true)}
-          disabled={isUploading}
-          className={`p-3 rounded-lg ${
-            isUploading ? "bg-gray-500" : "bg-blue-700"
-          }`}
-        >
-          <Text className="text-white text-center">Choose Image</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={handleUpload}
-          disabled={isUploading}
-          className={`p-3 rounded-lg ${
-            isUploading ? "bg-gray-500" : "bg-blue-700"
-          }`}
-        >
-          <Text className="text-white text-center">
-            {isUploading ? <ActivityIndicator /> : "Upload Image"}
-          </Text>
-        </TouchableOpacity>
+        <View className="flex gap-4 justify-center w-[70%] m-auto">
+          <Button
+            title="Choose Image"
+            onPress={() => setModalVisible(true)}
+            disabled={isUploading}
+            style={{
+              backgroundColor: isUploading ? "#A9A9A9" : "#007BFF",
+            }}
+          />
+          <Button
+            onPress={handleUpload}
+            disabled={isUploading}
+            style={{
+              backgroundColor: isUploading ? "#A9A9A9" : "#007BFF",
+            }}
+          >
+            {isUploading ? (
+              <ActivityIndicator />
+            ) : (
+              <Text style={{ color: "white" }}>Upload Image</Text>
+            )}
+          </Button>
+        </View>
 
         <ImagePickerModal
           modalVisible={modalVisible}
@@ -382,19 +385,16 @@ function ProfileContent() {
           takeImageWithCamera={pickImageWithCamera}
         />
         <View className="flex-row justify-center gap-8 w-full">
-          <TouchableOpacity
+          <Button
+            title="Edit Profile"
             onPress={() => setEditModalVisible(true)}
-            className="bg-blue-700 rounded-lg flex justify-center items-center p-3 w-32"
-          >
-            <Text className="text-white text-lg">Edit Profile</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
+            style={{ backgroundColor: "#007BFF", width: 128 }}
+          />
+          <Button
+            title="Log Out"
             onPress={logOut}
-            className="bg-[#E61E63] rounded-lg flex justify-center items-center p-3 w-32"
-          >
-            <Text className="text-white text-lg">Log Out</Text>
-          </TouchableOpacity>
+            style={{ backgroundColor: "#E61E63", width: 128 }}
+          />
         </View>
       </View>
       <EditProfileModal

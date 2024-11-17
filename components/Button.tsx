@@ -1,29 +1,58 @@
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-import { ButtonProps } from "../types/commonTypes";
+import {
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
+import { ButtonProps } from "@/types/commonTypes";
 
-const CustomButton: React.FC<ButtonProps> = ({
-  isLoggedIn,
-  onLogin,
-  onSignup,
+const Button: React.FC<ButtonProps> = ({
+  onPress,
+  title,
+  isLoading = false,
+  disabled = false,
+  style,
+  textStyle,
+  children,
 }) => {
-  const handleClick = () => {
-    if (isLoggedIn) {
-      onLogin();
-    } else {
-      onSignup();
-    }
-  };
-
   return (
-    <View className="border-2 dark:border-blue-500 rounded-md py-1 px-2">
-      <TouchableOpacity onPress={handleClick}>
-        <Text className="dark:text-white text-black text-lg">
-          {isLoggedIn ? "Login" : "Signup"}
-        </Text>
-      </TouchableOpacity>
-    </View>
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled || isLoading}
+      style={[
+        styles.button,
+        style,
+        (disabled || isLoading) && styles.disabledButton,
+      ]}
+    >
+      {isLoading ? (
+        <ActivityIndicator color="#FFFFFF" />
+      ) : children ? (
+        children
+      ) : (
+        <Text style={[styles.text, textStyle]}>{title}</Text>
+      )}
+    </TouchableOpacity>
   );
 };
 
-export default CustomButton;
+const styles = StyleSheet.create({
+  button: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: "#007BFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  disabledButton: {
+    backgroundColor: "#A9A9A9",
+  },
+  text: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
+
+export default Button;

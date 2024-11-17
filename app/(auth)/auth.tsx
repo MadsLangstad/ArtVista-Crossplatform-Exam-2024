@@ -97,13 +97,6 @@ export default function Auth() {
         }`}
       />
 
-      <CustomButton
-        isLoggedIn={isLogin}
-        onLogin={handleAuth}
-        onSignup={handleAuth}
-        loading={loading} // Add loading state to show a spinner if needed
-      />
-
       <TouchableOpacity
         onPress={() => {
           setIsLogin(!isLogin);

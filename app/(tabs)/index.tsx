@@ -14,6 +14,7 @@ import { fetchArtworks } from "@/services/firebaseService";
 import ArtworkItem from "@/components/ArtWorkItem";
 import { useAuth } from "@/hooks/useAuth";
 import { DocumentSnapshot } from "firebase/firestore";
+import Button from "@/components/Button";
 
 export default function Gallery() {
   const [artworks, setArtworks] = useState<ArtworkItemProps[]>([]);
@@ -106,12 +107,7 @@ export default function Gallery() {
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          <TouchableOpacity
-            className="flex justify-center items-center bg-blue-700 rounded-lg px-4 py-2"
-            onPress={handleSearch}
-          >
-            <Text className="text-lg font-semibold text-white">Search</Text>
-          </TouchableOpacity>
+          <Button title="Search" onPress={handleSearch} />
         </View>
       </Animated.View>
 

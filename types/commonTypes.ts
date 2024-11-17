@@ -1,6 +1,11 @@
+import { GestureResponderEvent, TextStyle, ViewStyle } from "react-native";
+
 export interface ButtonProps {
-  isLoggedIn: boolean;
-  onLogin: () => void;
-  onSignup: () => void;
-  loading: boolean; // Add loading prop
+  onPress: (event: GestureResponderEvent) => void;
+  title?: string;
+  isLoading?: boolean;
+  disabled?: boolean;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+  children?: React.ReactNode;
 }
