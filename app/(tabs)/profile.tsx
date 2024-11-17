@@ -9,8 +9,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useAuth } from "@/contexts/AuthContext";
-import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { addArtworkDetails, firestore } from "@/services/firebaseService";
 import { ref, getDownloadURL, uploadBytesResumable } from "firebase/storage";
 import { storage } from "@/services/firebaseConfig";
@@ -36,6 +36,7 @@ function ProfileContent() {
   const [description, setDescription] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
@@ -59,47 +60,122 @@ function ProfileContent() {
     fetchUserProfile();
   }, [user, refresh]);
 
+  // Function to convert URI to Blob using XMLHttpRequest
+  const uriToBlob = (uri: string): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function () {
+        reject(new Error("Failed to convert URI to Blob"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+  };
+
+  // Function to compress image using Expo ImageManipulator
+  const compressImage = async (uri: string): Promise<string> => {
+    try {
+      const compressedImage = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 1024 } }], // Resize to 1024px width
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      return compressedImage.uri;
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      throw new Error("Failed to compress image.");
+    }
+  };
+
   const handleUpload = async () => {
     if (!selectedImage || !title || !description) {
-      alert("Please fill out all fields and select an image!");
+      Alert.alert(
+        "Missing Information",
+        "Please fill out all fields and select an image!"
+      );
       return;
     }
     if (!user) {
-      alert("User not authenticated!");
+      Alert.alert("Authentication Error", "User not authenticated!");
       return;
     }
     setIsUploading(true);
     try {
-      const response = await fetch(selectedImage);
-      const blob = await response.blob();
+      // Compress the image before uploading
+      const compressedImageUri = await compressImage(selectedImage);
+      // Convert the compressed image URI to Blob
+      const blob = await uriToBlob(compressedImageUri);
+
       const fileName = `${user.uid}_${Date.now()}.jpg`;
       const storageRef = ref(storage, `artwork-images/${fileName}`);
-      await uploadBytesResumable(storageRef, blob);
-      const downloadURL = await getDownloadURL(storageRef);
-      await addArtworkDetails({
-        title,
-        description,
-        imageUrl: downloadURL,
-        artist: username || "Anonymous Artist",
-        year: new Date().getFullYear(),
-        hashtags: [],
-        artistId: user.uid,
-        uploadDate: new Date().toISOString(),
-        exhibitionInfo: {
-          location: "",
-          date: "",
+
+      const uploadTask = uploadBytesResumable(storageRef, blob);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload is ${progress}% done`);
+          setUploadProgress(Number(progress.toFixed(2)));
         },
-        upvote: 0,
-        downvote: 0,
-      });
-      alert("Image uploaded successfully!");
-      setTitle("");
-      setDescription("");
-      setSelectedImage(null);
+        (error) => {
+          console.error("Error during upload:", error.code, error.message);
+          Alert.alert(
+            "Upload Error",
+            `Failed to upload image: ${error.message}`
+          );
+          setIsUploading(false);
+        },
+        async () => {
+          try {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            console.log("Upload completed, file URL:", downloadURL);
+            await addArtworkDetails({
+              title,
+              description,
+              imageUrl: downloadURL,
+              artist: username || "Anonymous Artist",
+              year: new Date().getFullYear(),
+              hashtags: [],
+              artistId: user.uid,
+              uploadDate: new Date().toISOString(),
+              exhibitionInfo: {
+                location: "",
+                date: "",
+              },
+              upvote: 0,
+              downvote: 0,
+            });
+            Alert.alert("Success", "Image uploaded successfully!");
+            setTitle("");
+            setDescription("");
+            setSelectedImage(null);
+            setUploadProgress(0);
+          } catch (error) {
+            console.error("Error saving artwork details:", error);
+            Alert.alert(
+              "Save Error",
+              "Failed to save artwork details. Please try again."
+            );
+          } finally {
+            setIsUploading(false);
+          }
+        }
+      );
     } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("Failed to upload image. Please try again.");
-    } finally {
+      if (error instanceof Error) {
+        console.error("Error uploading image:", error.message);
+      } else {
+        console.error("Error uploading image:", error);
+      }
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      Alert.alert("Upload Error", `Failed to upload image: ${errorMessage}`);
       setIsUploading(false);
     }
   };
@@ -118,17 +194,40 @@ function ProfileContent() {
         let updatedImageUrl = profileImageUrl;
 
         if (profileImageUrl && !profileImageUrl.startsWith("https://")) {
-          const response = await fetch(profileImageUrl);
-          const blob = await response.blob();
+          const compressedProfileImageUri = await compressImage(
+            profileImageUrl
+          );
+          const blob = await uriToBlob(compressedProfileImageUri);
           const fileName = `profile-images/${user.uid}_${Date.now()}.jpg`;
           const storageRef = ref(storage, fileName);
           const uploadTask = uploadBytesResumable(storageRef, blob);
 
-          await new Promise((resolve, reject) => {
-            uploadTask.on("state_changed", null, reject, async () => {
-              updatedImageUrl = await getDownloadURL(storageRef);
-              resolve(updatedImageUrl);
-            });
+          await new Promise<void>((resolve, reject) => {
+            uploadTask.on(
+              "state_changed",
+              (snapshot) => {
+                const progress =
+                  (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log(`Profile Image Upload is ${progress}% done`);
+                setUploadProgress(Number(progress.toFixed(2)));
+              },
+              (error) => {
+                console.error("Error during profile image upload:", error);
+                Alert.alert(
+                  "Upload Error",
+                  `Failed to upload profile image: ${error.message}`
+                );
+                reject(error);
+              },
+              async () => {
+                try {
+                  updatedImageUrl = await getDownloadURL(storageRef);
+                  resolve();
+                } catch (error) {
+                  reject(error);
+                }
+              }
+            );
           });
         }
 
@@ -147,10 +246,13 @@ function ProfileContent() {
         setBio(bio);
         setProfileImageUrl(updatedImageUrl);
         setRefresh((prev) => !prev);
-        alert("Profile updated successfully!");
+        Alert.alert("Success", "Profile updated successfully!");
       } catch (error) {
         console.error("Error updating profile:", error);
-        alert("Failed to update profile. Please try again.");
+        Alert.alert(
+          "Update Error",
+          "Failed to update profile. Please try again."
+        );
       }
     }
   };
@@ -238,9 +340,25 @@ function ProfileContent() {
         )}
       </View>
       <View className="flex gap-4 justify-center w-[70%] m-auto">
+        {isUploading && (
+          <View className="mb-4">
+            <View className="bg-gray-300 h-2 rounded-lg overflow-hidden">
+              <View
+                style={{ width: `${uploadProgress}%` }}
+                className="bg-blue-700 h-full"
+              />
+            </View>
+            <Text className="text-center text-sm mt-2 dark:text-white">
+              Uploading: {uploadProgress}%
+            </Text>
+          </View>
+        )}
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
-          className="bg-blue-700 p-3  rounded-lg"
+          disabled={isUploading}
+          className={`p-3 rounded-lg ${
+            isUploading ? "bg-gray-500" : "bg-blue-700"
+          }`}
         >
           <Text className="text-white text-center">Choose Image</Text>
         </TouchableOpacity>
@@ -248,7 +366,9 @@ function ProfileContent() {
         <TouchableOpacity
           onPress={handleUpload}
           disabled={isUploading}
-          className="bg-blue-700 p-3 rounded-lg"
+          className={`p-3 rounded-lg ${
+            isUploading ? "bg-gray-500" : "bg-blue-700"
+          }`}
         >
           <Text className="text-white text-center">
             {isUploading ? <ActivityIndicator /> : "Upload Image"}

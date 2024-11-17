@@ -32,6 +32,46 @@ const storage = getStorage(app);
 export const firestore = getFirestore(app);
 
 // Artworks
+// export const fetchArtworks = async (
+//   referenceDoc: DocumentSnapshot | null = null,
+//   loadOlderItems: boolean = false,
+//   pageSize: number = 10
+// ): Promise<{
+//   artworks: ArtworkItemProps[];
+//   firstVisible: DocumentSnapshot | null;
+//   lastVisible: DocumentSnapshot | null;
+// }> => {
+//   let artworksQuery = query(
+//     collection(firestore, "artworks"),
+//     orderBy("uploadDate", "desc"),
+//     limit(pageSize)
+//   );
+
+//   if (referenceDoc) {
+//     artworksQuery = loadOlderItems
+//       ? query(artworksQuery, startAfter(referenceDoc))
+//       : query(artworksQuery, endBefore(referenceDoc));
+//   }
+
+//   try {
+//     const artworkSnapshots = await getDocs(artworksQuery);
+
+//     const artworks = artworkSnapshots.docs.map((doc) => ({
+//       ...(doc.data() as ArtworkItemProps),
+//       id: doc.id,
+//     }));
+
+//     const firstVisible = artworkSnapshots.docs[0] || null;
+//     const lastVisible =
+//       artworkSnapshots.docs[artworkSnapshots.docs.length - 1] || null;
+
+//     return { artworks, firstVisible, lastVisible };
+//   } catch (error) {
+//     console.error("Error fetching artworks:", error);
+//     throw new Error("Failed to fetch artworks. Please try again.");
+//   }
+// };
+
 export const fetchArtworks = async (
   referenceDoc: DocumentSnapshot | null = null,
   loadOlderItems: boolean = false,
@@ -41,25 +81,28 @@ export const fetchArtworks = async (
   firstVisible: DocumentSnapshot | null;
   lastVisible: DocumentSnapshot | null;
 }> => {
-  let artworksQuery = query(
-    collection(firestore, "artworks"),
-    orderBy("uploadDate", "desc"),
-    limit(pageSize)
-  );
-
-  if (referenceDoc) {
-    artworksQuery = loadOlderItems
-      ? query(artworksQuery, startAfter(referenceDoc))
-      : query(artworksQuery, endBefore(referenceDoc));
-  }
-
   try {
-    const artworkSnapshots = await getDocs(artworksQuery);
+    let artworksQuery = query(
+      collection(firestore, "artworks"),
+      orderBy("uploadDate", "desc"),
+      limit(pageSize)
+    );
 
+    if (referenceDoc) {
+      artworksQuery = loadOlderItems
+        ? query(artworksQuery, startAfter(referenceDoc))
+        : query(artworksQuery, endBefore(referenceDoc));
+    }
+
+    const artworkSnapshots = await getDocs(artworksQuery);
     const artworks = artworkSnapshots.docs.map((doc) => ({
       ...(doc.data() as ArtworkItemProps),
       id: doc.id,
     }));
+
+    if (artworkSnapshots.empty) {
+      return { artworks: [], firstVisible: null, lastVisible: null };
+    }
 
     const firstVisible = artworkSnapshots.docs[0] || null;
     const lastVisible =
@@ -109,16 +152,26 @@ export const uploadArtworkImage = async (file: Blob, fileName: string) => {
     return new Promise((resolve, reject) => {
       uploadTask.on(
         "state_changed",
-        null,
-        (error) =>
-          reject(new Error("Failed to upload image. Please try again.")),
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload is ${progress}% done`);
+        },
+        (error) => {
+          console.error(
+            `Upload failed. Code: ${error.code}, Message: ${error.message}`
+          );
+          reject(new Error(`Failed to upload image: ${error.message}`));
+        },
         async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          console.log("Upload successful, file available at:", downloadURL);
           resolve(downloadURL);
         }
       );
     });
   } catch (error) {
+    console.error("Error initializing upload:", error);
     throw new Error("Failed to upload image. Please try again.");
   }
 };
@@ -183,6 +236,7 @@ export const fetchComments = async (
           id: doc.id,
           artworkId,
           ...doc.data(),
+          author: doc.data()?.author || "Anonymous", // Corrected field
         } as Comment)
     );
 
@@ -204,20 +258,18 @@ export const addComment = async (
   userId: string
 ): Promise<string> => {
   try {
-    // Retrieve the user's profile data to get the username
     const userDoc = await getDoc(doc(firestore, "users", userId));
     if (!userDoc.exists()) {
       throw new Error("User profile not found.");
     }
 
-    const username = userDoc.data()?.username || "Anonymous";
+    const author = userDoc.data()?.username || "Anonymous";
 
-    // Create the comment object with the author's username
     const comment = {
       text,
       timestamp: new Date().toISOString(),
       userId,
-      username,
+      author, // Ensure this field is 'author'
     };
 
     const docRef = await addDoc(
@@ -231,7 +283,6 @@ export const addComment = async (
   }
 };
 
-// Function to edit a comment
 export const editComment = async (
   artworkId: string,
   commentId: string,
@@ -256,17 +307,14 @@ export const editComment = async (
 
 export const deleteComment = async (artworkId: string, commentId: string) => {
   try {
-    // Reference to the specific comment
     const commentRef = doc(
       firestore,
       `artworks/${artworkId}/comments`,
       commentId
     );
 
-    // Delete the comment
     await deleteDoc(commentRef);
 
-    // Decrement the commentsCount in the artwork document
     const artworkRef = doc(firestore, "artworks", artworkId);
     await updateDoc(artworkRef, {
       commentsCount: increment(-1),

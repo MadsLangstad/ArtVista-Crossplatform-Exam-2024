@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 
 export default function SplashScreen() {
@@ -7,14 +7,14 @@ export default function SplashScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.push("/(tabs)/");
+      router.push("/(tabs)");
     }, 4500);
 
     return () => clearTimeout(timer);
   }, [router]);
 
   return (
-    <View className="flex top-32 justify-center items-center dark:bg-black px-6">
+    <View className="flex-1 h-full justify-center items-center dark:bg-black px-6">
       <Image
         source={require("@/assets/images/artvista-logo.png")}
         className="w-96 h-96"

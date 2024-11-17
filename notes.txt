@@ -1,7 +1,8 @@
 Fikse så alle knapper er like.
 Implementere Google login/signup
 Fikse farger light/dark consistency
-fikse logikk votes, kan bare vote opp eller ned en gang.
-implementere likes og iconer for comment(antall)
-Implementere Protected routes
-Isteden for å vise en acces denied skjer i details og så en på profile, lage heller en komponent som kan brukes egge stedene
+Fikse voting, implementere average rating på bilder.
+Legge til kommentarer på kompleks kode
+User feeback.
+Fikse mer kompleks search.
+Featured artists.

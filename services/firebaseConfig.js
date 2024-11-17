@@ -1,9 +1,14 @@
-// firebaseConfig.js
-import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database"; // Import Realtime Database
-import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+import { initializeApp, getApps } from "firebase/app";
+import { getDatabase } from "firebase/database";
+import {
+  getAuth,
+  initializeAuth,
+  browserSessionPersistence,
+} from "firebase/auth";
+import { getReactNativePersistence } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getStorage } from "firebase/storage";
+import { Platform } from "react-native";
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_API_KEY,
@@ -15,10 +20,19 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
+
+const auth =
+  Platform.OS === "web"
+    ? (() => {
+        const authInstance = getAuth(app);
+        authInstance.setPersistence(browserSessionPersistence);
+        return authInstance;
+      })()
+    : initializeAuth(app, {
+        persistence: getReactNativePersistence(AsyncStorage),
+      });
+
 const storage = getStorage(app);
 const database = getDatabase(app);
 
