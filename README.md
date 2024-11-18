@@ -1,82 +1,124 @@
-# ArtVista
+# ArtVista 🎨
 
 **ArtVista** is a digital art gallery application developed for the TDS200 Crossplatform course. The app allows artists to upload their artwork, and art enthusiasts to explore, interact, and engage with the art community. It is built with React Native using Expo, NativeWind for styling, Firebase for backend services, and TypeScript for type safety.
 
----
+## Table of Contents 📑
 
-## Table of Contents
-
+- [Main Features](#main-features)
+- [Technologies](#technologies)
 - [Installation](#installation)
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Setup](#setup)
+- [Configuration](#configuration)
 - [Usage](#usage)
+- [Project Structure](#project-structure)
 - [Future Improvements](#future-improvements)
 - [Author](#author)
 
----
+## Main Features ✨
 
-## Installation
+### User Experience
+
+- **Dynamic Theme**: Support for both light and dark themes
+- **Responsive Design**: Seamless experience on all devices
+- **Offline Support**: Basic functionality without internet
+
+### Authentication & Security
+
+- **User Registration and Login**
+- **Protected Routes**: Secure access to private features
+- **Password Recovery**
+- **Persistent Login**: Remain logged in between sessions
+
+### Art Gallery
+
+- **Infinite Scroll**: Dynamic loading of content
+- **Advanced Search**: Search in titles, descriptions, and abstracts
+- **Detailed Views**: Comprehensive information about each artwork
+- **Image Compression**: Automatic optimization of uploaded images
+
+### Social Features
+
+- **Likes System**: Engage with artworks
+- **Comment System**: Discuss art with other users
+- **Voting**: Upvote/downvote system
+- **Real-time Updates**: Live updates of interactions
+
+### Artist Features
+
+- **Profile Editing**: Customize artist profile
+- **Image Uploading**: Support for camera and gallery
+- **Content Management**: Edit and delete own artworks
+- **Engagement Statistics**: Track likes, comments, and views
+
+## Technologies 🛠
+
+### Frontend
+
+- React Native with Expo
+- TypeScript for type safety
+- NativeWind (Tailwind CSS for React Native)
+- Expo Router for navigation
+
+### Backend & Services
+
+- Firebase Authentication
+- Cloud Firestore
+- Firebase Storage
+- Realtime Database
+
+### Development Tools
+
+- Expo CLI
+- TypeScript
+- ESLint & Prettier
+
+## Installation 🚀
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/ArtVista.git
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd ArtVista
-   ```
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
-4. Start the Expo development server:
-   ```bash
-   npx expo start
-   ```
 
----
+```bash
+git clone https://github.com/yourusername/ArtVista.git
+cd ArtVista
+```
 
-## Features
+2. Install dependencies:
 
-- **Artwork Viewing**: Browse artworks in list or grid formats with detailed views.
-- **Artist Uploads**: Securely upload artwork with images, descriptions, and hashtags.
-- **Authentication**: User registration and login using Firebase, with support for social logins.
-- **Navigation**: Seamless transitions between screens using React Navigation.
-- **Community Interaction**: Comment on and vote for artworks.
+```bash
+npm install
+```
 
----
+3. Start the development server:
 
-## Technologies Used
+```bash
+npx expo start
+```
 
-- **Frontend**: React Native, Expo, NativeWind
-- **Backend**: Firebase (Authentication, Firestore, Storage)
-- **Language**: TypeScript
-- **Navigation**: React Navigation
-- **Image Handling**: Expo ImagePicker
+## Configuration ⚙️
 
----
+1. Create a `.env` file in the root directory:
 
-## Setup
+```env
+EXPO_PUBLIC_API_KEY=your_api_key
+EXPO_PUBLIC_AUTH_DOMAIN=your_auth_domain
+EXPO_PUBLIC_DATABASE_URL=your_database_url
+EXPO_PUBLIC_PROJECT_ID=your_project_id
+EXPO_PUBLIC_STORAGE_BUCKET=your_storage_bucket
+EXPO_PUBLIC_MESSAGING_SENDER_ID=your_messaging_sender_id
+EXPO_PUBLIC_APP_ID=your_app_id
+```
 
-1. **Firebase Configuration**:
+2. Configure Firebase:
+   - Create a project in the Firebase Console
+   - Enable Authentication, Firestore, and Storage
+   - Download the configuration file
 
-   - Create a project in the [Firebase Console](https://console.firebase.google.com/).
-   - Enable **Email/Password Authentication** and **Google Sign-In**.
-   - Set up **Firestore Database** and **Storage** for image handling.
-   - Add your Firebase configuration to a `firebase.ts` file in the `/services` directory.
-
-2. **Environment Variables**:
-   - Securely configure your Firebase API keys.
-
----
-
-## Usage
+## Usage 📖
 
 1. **Start Development Server**:
+
    ```bash
    npx expo start
    ```
+
 2. **Testing**:
 
    - Use the Expo Go app for mobile testing or run on an Android/iOS emulator.
@@ -84,19 +126,37 @@
 3. **Deployment**:
    - Refer to Expo’s documentation for building and deploying the app.
 
----
+## Project Structure 📁
 
-## Future Improvements
+```
+artvista/
+├── app/                    # Application routes and screens
+│   ├── (tabs)/            # Tab navigation
+│   ├── (auth)/            # Authentication screens
+│   └── (artwork)/         # Artwork-related screens
+├── components/            # Reusable components
+├── contexts/             # React Context providers
+├── hooks/                # Custom React hooks
+├── services/            # Firebase and other services
+├── types/               # TypeScript type definitions
+└── assets/              # Images, fonts, and other static files
+```
 
-- **Search and Filtering**: Add advanced search functionality for artworks.
-- **Artist Profiles**: Create detailed profiles linking to their artworks.
-- **Accessibility**: Enhance support for users with disabilities.
+## Future Improvements 🔮
 
----
+- Implement search filters and categories
+- Add support for art exhibitions
+- Improve image optimization
+- Implement chat functionality
+- Expand offline functionality
 
-## Author
+## Author 👨‍💻
 
-- **Name**: Mads Langstad
-- **Course**: TDS200 Crossplatform, Høyskolen Kristiania
+**Mads Langstad**  
+TDS200 Crossplatform, Kristiania University College
+
+## License 📄
+
+This project is licensed under the MIT License.
 
 ---
