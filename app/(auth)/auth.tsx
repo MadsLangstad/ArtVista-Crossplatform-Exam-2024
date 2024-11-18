@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, Alert, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Alert,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import { useAuth } from "../../hooks/useAuth";
 import { useColorScheme } from "react-native";
 import { router } from "expo-router";
-import CustomButton from "@/components/Button";
+import Button from "@/components/Button";
 
 export default function Auth() {
   const { user, signIn, signUp } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState(""); // New state for username
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const colorScheme = useColorScheme();
 
@@ -31,7 +38,7 @@ export default function Auth() {
       if (isLogin) {
         await signIn(email, password);
       } else {
-        await signUp(email, password, username); // Pass username to signUp
+        await signUp(email, password, username);
       }
     } catch (error) {
       const errorMessage =
@@ -44,7 +51,7 @@ export default function Auth() {
 
   return (
     <View
-      className={`flex-1 justify-center items-center p-4 ${
+      className={`flex-1 justify-center items-center p-4 mb-20 ${
         colorScheme === "dark" ? "bg-black" : "bg-white"
       }`}
     >
@@ -53,7 +60,10 @@ export default function Auth() {
           colorScheme === "dark" ? "text-white" : "text-black"
         }`}
       >
-        {isLogin ? "Login" : "Sign Up"}
+        <Image
+          source={require("@/assets/images/artvista-logo.png")}
+          className="w-96 h-96"
+        />
       </Text>
       {!isLogin && (
         <TextInput
@@ -62,7 +72,7 @@ export default function Auth() {
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
-          className={`w-full p-3 mb-4 rounded-lg ${
+          className={`p-3 mb-4 bg-gray-200 w-[70%] m-auto dark:bg-gray-800 text-black dark:text-white rounded-lg border-2 border-[#E91E63] ${
             colorScheme === "dark"
               ? "bg-gray-800 text-white"
               : "bg-gray-200 text-black"
@@ -77,7 +87,7 @@ export default function Auth() {
         onChangeText={setEmail}
         keyboardType="email-address"
         autoCapitalize="none"
-        className={`w-full p-3 mb-4 rounded-lg ${
+        className={`p-3 mb-4 w-[70%] border-2 border-[#E61E63] rounded-lg  ${
           colorScheme === "dark"
             ? "bg-gray-800 text-white"
             : "bg-gray-200 text-black"
@@ -90,24 +100,40 @@ export default function Auth() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        className={`w-full p-3 mb-6 rounded-lg ${
+        className={`p-3 mb-6 w-[70%] rounded-lg border-2 border-[#E61E63] ${
           colorScheme === "dark"
             ? "bg-gray-800 text-white"
             : "bg-gray-200 text-black"
         }`}
       />
 
-      <TouchableOpacity
-        onPress={() => {
-          setIsLogin(!isLogin);
-          setUsername(""); // Clear username when toggling
+      <Button
+        onPress={handleAuth}
+        title={isLogin ? "Login" : "Sign Up"}
+        style={{
+          backgroundColor: "#007BFF",
+          borderRadius: 8,
+          paddingVertical: 12,
+          marginBottom: 16,
+          width: "45%",
         }}
-        className="mt-4"
-      >
-        <Text className="dark:text-lightblue-500 text-blue-500">
+        textStyle={{
+          fontSize: 16,
+          fontWeight: "600",
+          textAlign: "center",
+          color: "white",
+        }}
+      />
+      <TouchableOpacity>
+        <Text
+          onPress={() => setIsLogin(!isLogin)}
+          className={`text-blue-500 ${
+            colorScheme === "dark" ? "text-white" : "text-black"
+          }`}
+        >
           {isLogin
             ? "Don't have an account? Sign up"
-            : "Already have an account? Log in"}
+            : "Already have an account? Login"}
         </Text>
       </TouchableOpacity>
     </View>

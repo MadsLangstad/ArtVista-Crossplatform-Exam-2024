@@ -11,6 +11,7 @@ export interface ArtworkItemProps {
 export interface ArtworkItemComponentProps {
   item: ArtworkItemProps;
   handlePress: (item: ArtworkItemProps) => void;
+  searchQuery: string;
 }
 
 export interface ArtworkDetails {

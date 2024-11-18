@@ -1,9 +1,5 @@
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { app, storage } from "./firebaseConfig";
 import {
   getFirestore,
   collection,
@@ -21,56 +17,13 @@ import {
   DocumentSnapshot,
   endBefore,
 } from "firebase/firestore";
-import { app } from "./firebaseConfig";
 import {
   ArtworkDetails,
   ArtworkItemProps,
   Comment,
 } from "@/types/galleryTypes";
 
-const storage = getStorage(app);
 export const firestore = getFirestore(app);
-
-// Artworks
-// export const fetchArtworks = async (
-//   referenceDoc: DocumentSnapshot | null = null,
-//   loadOlderItems: boolean = false,
-//   pageSize: number = 10
-// ): Promise<{
-//   artworks: ArtworkItemProps[];
-//   firstVisible: DocumentSnapshot | null;
-//   lastVisible: DocumentSnapshot | null;
-// }> => {
-//   let artworksQuery = query(
-//     collection(firestore, "artworks"),
-//     orderBy("uploadDate", "desc"),
-//     limit(pageSize)
-//   );
-
-//   if (referenceDoc) {
-//     artworksQuery = loadOlderItems
-//       ? query(artworksQuery, startAfter(referenceDoc))
-//       : query(artworksQuery, endBefore(referenceDoc));
-//   }
-
-//   try {
-//     const artworkSnapshots = await getDocs(artworksQuery);
-
-//     const artworks = artworkSnapshots.docs.map((doc) => ({
-//       ...(doc.data() as ArtworkItemProps),
-//       id: doc.id,
-//     }));
-
-//     const firstVisible = artworkSnapshots.docs[0] || null;
-//     const lastVisible =
-//       artworkSnapshots.docs[artworkSnapshots.docs.length - 1] || null;
-
-//     return { artworks, firstVisible, lastVisible };
-//   } catch (error) {
-//     console.error("Error fetching artworks:", error);
-//     throw new Error("Failed to fetch artworks. Please try again.");
-//   }
-// };
 
 export const fetchArtworks = async (
   referenceDoc: DocumentSnapshot | null = null,
@@ -236,7 +189,7 @@ export const fetchComments = async (
           id: doc.id,
           artworkId,
           ...doc.data(),
-          author: doc.data()?.author || "Anonymous", // Corrected field
+          author: doc.data()?.author || "Anonymous",
         } as Comment)
     );
 
@@ -269,7 +222,7 @@ export const addComment = async (
       text,
       timestamp: new Date().toISOString(),
       userId,
-      author, // Ensure this field is 'author'
+      author,
     };
 
     const docRef = await addDoc(
@@ -327,7 +280,7 @@ export const deleteComment = async (artworkId: string, commentId: string) => {
   }
 };
 
-// Sample data
+// Sample data for Firestore collections
 const sampleArtwork = {
   title: "Starry Night",
   description: "An iconic painting by Vincent van Gogh.",

@@ -341,20 +341,20 @@ function ProfileContent() {
         )}
       </View>
       <View className="flex gap-4 justify-center w-[70%] m-auto">
-        {isUploading && (
-          <View className="mb-4">
-            <View className="bg-gray-300 h-2 rounded-lg overflow-hidden">
-              <View
-                style={{ width: `${uploadProgress}%` }}
-                className="bg-blue-700 h-full"
-              />
-            </View>
-            <Text className="text-center text-sm mt-2 dark:text-white">
-              Uploading: {uploadProgress}%
-            </Text>
-          </View>
-        )}
         <View className="flex gap-4 justify-center w-[70%] m-auto">
+          {isUploading && (
+            <View className="mb-4">
+              <View className="bg-gray-300 h-2 rounded-lg overflow-hidden">
+                <View
+                  style={{ width: `${uploadProgress}%` }}
+                  className="bg-blue-700 h-full"
+                />
+              </View>
+              <Text className="text-center text-sm mt-2 dark:text-white">
+                Uploading: {uploadProgress}%
+              </Text>
+            </View>
+          )}
           <Button
             title="Choose Image"
             onPress={() => setModalVisible(true)}
@@ -366,16 +366,11 @@ function ProfileContent() {
           <Button
             onPress={handleUpload}
             disabled={isUploading}
+            title="Upload"
             style={{
               backgroundColor: isUploading ? "#A9A9A9" : "#007BFF",
             }}
-          >
-            {isUploading ? (
-              <ActivityIndicator />
-            ) : (
-              <Text style={{ color: "white" }}>Upload Image</Text>
-            )}
-          </Button>
+          />
         </View>
 
         <ImagePickerModal

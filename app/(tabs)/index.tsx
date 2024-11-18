@@ -7,14 +7,14 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { router } from "expo-router";
 import { ArtworkItemProps } from "@/types/galleryTypes";
 import { fetchArtworks } from "@/services/firebaseService";
 import ArtworkItem from "@/components/ArtWorkItem";
-import { useAuth } from "@/hooks/useAuth";
 import { DocumentSnapshot } from "firebase/firestore";
-import Button from "@/components/Button";
+import { useDebounce } from "@/hooks/useDebouced";
 
 export default function Gallery() {
   const [artworks, setArtworks] = useState<ArtworkItemProps[]>([]);
@@ -24,6 +24,9 @@ export default function Gallery() {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const scrollY = useRef(new Animated.Value(0)).current;
+
+  // Debounced search query to reduce unnecessary API calls
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const fetchArtworksData = async (refresh = false, query = "") => {
     try {
@@ -49,7 +52,9 @@ export default function Gallery() {
 
       const filteredArtworks = query
         ? uniqueArtworks.filter((artwork) =>
-            artwork.title.toLowerCase().includes(query.toLowerCase())
+            [artwork.title, artwork.description, artwork.abstract].some(
+              (field) => field?.toLowerCase().includes(query.toLowerCase())
+            )
           )
         : uniqueArtworks;
 
@@ -67,18 +72,22 @@ export default function Gallery() {
     fetchArtworksData();
   }, []);
 
+  useEffect(() => {
+    fetchArtworksData(true, debouncedSearchQuery);
+  }, [debouncedSearchQuery]);
+
   const refreshArtworksData = () => fetchArtworksData(true);
 
   const handleArtworkPress = (artwork: ArtworkItemProps) => {
     router.push(`/(artwork)/detail?id=${artwork.id}`);
   };
 
-  const handleSearch = () => {
-    fetchArtworksData(true, searchQuery);
-  };
-
   const renderItem = ({ item }: { item: ArtworkItemProps }) => (
-    <ArtworkItem item={item} handlePress={handleArtworkPress} />
+    <ArtworkItem
+      item={item}
+      handlePress={handleArtworkPress}
+      searchQuery={searchQuery}
+    />
   );
 
   const headerTranslateY = scrollY.interpolate({
@@ -103,11 +112,17 @@ export default function Gallery() {
         <View className="flex-row justify-between items-center">
           <TextInput
             className="border-2 border-pink-700 px-2 dark:text-white py-2.5 font-semibold rounded-lg flex-1 mr-2"
-            placeholder="Search for specific artwork"
+            placeholder="Search by title, description, or abstract"
+            placeholderTextColor="#aaa" // Light gray for visibility
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          <Button title="Search" onPress={handleSearch} />
+          <TouchableOpacity
+            onPress={() => setSearchQuery("")}
+            className="bg-pink-700 px-4 py-3 rounded-lg"
+          >
+            <Text className="text-white">Search</Text>
+          </TouchableOpacity>
         </View>
       </Animated.View>
 
@@ -118,7 +133,7 @@ export default function Gallery() {
         numColumns={1}
         style={{ paddingHorizontal: 10 }}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 60 }}
+        contentContainerStyle={{ paddingTop: Platform.OS === "ios" ? 60 : 70 }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true }
@@ -131,6 +146,11 @@ export default function Gallery() {
             tintColor="#E91E63"
             progressViewOffset={40}
           />
+        }
+        ListEmptyComponent={
+          !loading ? (
+            <Text className="text-center mt-10">No artworks found</Text>
+          ) : null
         }
         ListFooterComponent={
           loading && !refreshing ? (

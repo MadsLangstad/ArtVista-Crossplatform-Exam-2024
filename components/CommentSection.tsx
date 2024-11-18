@@ -178,9 +178,9 @@ const CommentActions = ({
     <Button
       onPress={() => handleDelete(comment.id, comment.artworkId)}
       style={{
-        backgroundColor: "transparent", // No background
-        padding: 0, // Remove padding
-        marginRight: 8, // Add margin
+        backgroundColor: "transparent",
+        padding: 0,
+        marginRight: 8,
       }}
     >
       <Icon name="close-circle" size={18} color="#f44336" />
@@ -226,7 +226,7 @@ const EditCommentInput = ({
           backgroundColor: "gray",
           padding: 8,
           borderRadius: 8,
-          marginLeft: 8, // Adds spacing between buttons
+          marginLeft: 8,
         }}
         textStyle={{
           color: "white",
