@@ -33,7 +33,7 @@ export function useAuth(): AuthContextType {
         // Fetch the username from Firestore
         const userDoc = await getDoc(doc(firestore, "users", user.uid));
         if (userDoc.exists()) {
-          setUsername(userDoc.data()?.username || ""); // Set the username
+          setUsername(userDoc.data()?.username || "");
         }
       }
     });

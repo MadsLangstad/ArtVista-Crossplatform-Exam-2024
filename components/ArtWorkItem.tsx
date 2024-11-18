@@ -37,7 +37,7 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
         if (artworkDoc.exists()) {
           const data = artworkDoc.data();
           setLikesCount(data.likes || 0);
-          setCommentsCount(data.commentsCount || 0); // Fetch latest commentsCount
+          setCommentsCount(data.commentsCount || 0);
         }
 
         if (user) {
@@ -70,13 +70,11 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
 
     try {
       if (!isLiked) {
-        // Add a document in the `likes` subcollection with the user's ID
         await setDoc(userLikeRef, { liked: true });
         await updateDoc(artworkRef, { likes: increment(1) });
         setLikesCount(likesCount + 1);
         setIsLiked(true);
       } else {
-        // Remove the document from the `likes` subcollection
         await deleteDoc(userLikeRef);
         await updateDoc(artworkRef, { likes: increment(-1) });
         setLikesCount(likesCount - 1);
@@ -95,10 +93,10 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
   return (
     <TouchableOpacity
       onPress={() => handlePress(item)}
-      className="mb-6 rounded-lg bg-white dark:bg-slate-900 shadow-md w-full border-2 border-[#E91E63]"
+      className="mb-6 rounded-lg bg-white dark:bg-slate-900 shadow-md w-full"
       style={{ elevation: 3 }}
     >
-      <View className="w-full h-48 bg-gray-200 dark:bg-slate-800 rounded-lg overflow-hidden relative">
+      <View className="w-full h-48 bg-gray-200 dark:bg-slate-800 rounded-sm overflow-hidden relative">
         {imageLoading && (
           <View
             style={{
@@ -117,13 +115,13 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
         )}
         <Image
           source={{ uri: item.imageUrl }}
-          className="w-full h-full"
+          className="w-full h-full border-2 border-[#E91E63] rounded-lg"
           resizeMode="cover"
           onLoad={() => setImageLoading(false)}
           style={{ position: "absolute", width: "100%", height: "100%" }}
         />
         {/* Overlay Container */}
-        <View className="absolute bottom-0 inset-x-0 bg-black opacity-75 px-2 flex-row justify-between items-center">
+        <View className="absolute bottom-0 rounded-b-lg inset-x-0 bg-black opacity-75 px-2 flex-row justify-between items-center">
           <View className="flex-1">
             <Text className="text-lg font-bold text-white">{item.title}</Text>
             <Text

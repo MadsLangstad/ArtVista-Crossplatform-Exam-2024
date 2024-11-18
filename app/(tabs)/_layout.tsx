@@ -2,7 +2,6 @@ import { Tabs } from "expo-router";
 import React from "react";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabsLayout() {
@@ -11,11 +10,11 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         tabBarStyle: {
           backgroundColor: colorScheme === "dark" ? "#000000" : "#FFFFFF",
         },
-        tabBarInactiveTintColor: colorScheme === "dark" ? "#FFFFFF" : "#000000",
+        tabBarActiveTintColor: "#E91E63",
+        tabBarInactiveTintColor: "#007BFF",
         headerShown: true,
         headerStyle: {
           backgroundColor: colorScheme === "dark" ? "#000000" : "#FFFFFF",
@@ -27,7 +26,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Gallery",
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ color }) => (
             <MaterialIcons name="browse-gallery" size={24} color={color} />
           ),
         }}
@@ -36,7 +35,7 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, focused }) => (
+          tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons
               name="face-man-profile"
               size={24}

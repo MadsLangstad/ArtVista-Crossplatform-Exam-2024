@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Modal,
-  Image,
-  Alert,
-} from "react-native";
+import { View, Text, TextInput, Modal, Image, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { EditProfileModalProps } from "@/types/profileTypes";
 import Button from "./Button";
@@ -67,7 +59,7 @@ export default function EditProfileModal({
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+      <View className="flex-1 justify-center items-center bg-white dark:bg-black bg-opacity-50">
         <View className="w-4/5 bg-white dark:bg-slate-900 p-6 rounded-lg shadow-lg">
           <Text className="text-xl font-bold text-center mb-4 text-[#E91E63]">
             Edit Profile
@@ -77,8 +69,8 @@ export default function EditProfileModal({
           <Button
             onPress={pickProfileImage}
             style={{
-              backgroundColor: "transparent", // No background
-              marginBottom: 16, // Spacing between buttons
+              backgroundColor: "transparent",
+              marginBottom: 16,
               justifyContent: "center",
             }}
           >

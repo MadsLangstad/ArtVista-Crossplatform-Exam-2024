@@ -26,7 +26,6 @@ import { ArtworkDetails, Comment } from "@/types/galleryTypes";
 import { useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
 import CommentSection from "@/components/CommentSection";
-import { router } from "expo-router";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function Detail() {
@@ -59,7 +58,6 @@ function DetailContent() {
           const { comments: fetchedComments, lastVisible } =
             await fetchComments(Array.isArray(id) ? id[0] : id);
 
-          // Format the timestamps for each comment
           const formattedComments = fetchedComments.map((comment) => ({
             ...comment,
             timestamp: comment.timestamp || "Unknown date",
@@ -202,7 +200,6 @@ function DetailContent() {
   }
 
   function fetchMoreComments(): Promise<void> {
-    // Implement actual fetch logic here
     return new Promise(async (resolve) => {
       if (lastComment) {
         try {
@@ -232,7 +229,7 @@ function DetailContent() {
   return (
     <View className="flex-1 bg-white dark:bg-black">
       <View className="flex-1 p-4">
-        <View className="relative w-full h-80 mb-4 border-2 border-[#E61E63] rounded-lg">
+        <View className="relative w-full h-80 mb-4 rounded-lg">
           {imageLoading && (
             <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center">
               <ActivityIndicator size="large" color="#E91E63" />
@@ -240,7 +237,7 @@ function DetailContent() {
           )}
           <Image
             source={{ uri: artworkDetails.imageUrl }}
-            className="w-full h-full rounded-lg"
+            className="w-full h-full rounded-lg border-2 border-[#E61E63]"
             resizeMode="cover"
             onLoad={() => setImageLoading(false)}
           />

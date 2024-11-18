@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Modal, TouchableOpacity } from "react-native";
+import { View, Text, Modal } from "react-native";
 import { ImagePickerModalProps } from "@/types/profileTypes";
 import Button from "./Button";
 
@@ -16,7 +16,7 @@ export default function ImagePickerModal({
       visible={modalVisible}
       onRequestClose={() => setModalVisible(false)}
     >
-      <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+      <View className="flex-1 justify-center items-center bg-white dark:bg-black bg-opacity-50">
         <View className="w-4/5 bg-white dark:bg-slate-900 p-6 rounded-lg shadow-lg">
           <Text className="text-xl font-bold text-center mb-4 text-[#E91E63]">
             Select an Option
@@ -64,7 +64,7 @@ export default function ImagePickerModal({
           <Button
             onPress={() => setModalVisible(false)}
             style={{
-              backgroundColor: "#D1D5DB", // Light gray background
+              backgroundColor: "#D1D5DB",
               borderRadius: 8,
               paddingVertical: 12,
             }}

@@ -247,7 +247,7 @@ const CommentInput = ({
   setCommentText: (text: string) => void;
   handleAddComment: () => void;
 }) => (
-  <View className="absolute bottom-0 left-0 right-0 dark:bg-black py-4 dark:border-gray-800">
+  <View className="absolute bottom-0 left-0 right-0 bg-white dark:bg-black py-4 dark:border-gray-800">
     <TextInput
       value={commentText}
       onChangeText={setCommentText}

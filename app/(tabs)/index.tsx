@@ -111,9 +111,9 @@ export default function Gallery() {
       >
         <View className="flex-row justify-between items-center">
           <TextInput
-            className="border-2 border-pink-700 px-2 dark:text-white py-2.5 font-semibold rounded-lg flex-1 mr-2"
+            className="border-2 border-[#E91E63] px-2 dark:text-white py-2.5 font-semibold rounded-lg flex-1 mr-2"
             placeholder="Search by title, description, or abstract"
-            placeholderTextColor="#aaa" // Light gray for visibility
+            placeholderTextColor="#aaa"
             value={searchQuery}
             onChangeText={setSearchQuery}
           />

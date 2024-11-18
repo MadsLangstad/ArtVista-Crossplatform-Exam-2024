@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Image,
   Text,
-  ActivityIndicator,
 } from "react-native";
 import { useAuth } from "@/contexts/AuthContext";
 import * as ImagePicker from "expo-image-picker";
@@ -61,7 +60,7 @@ function ProfileContent() {
     fetchUserProfile();
   }, [user, refresh]);
 
-  // Function to convert URI to Blob using XMLHttpRequest
+  // Converts URI to Blob using XMLHttpRequest
   const uriToBlob = (uri: string): Promise<Blob> => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -77,12 +76,12 @@ function ProfileContent() {
     });
   };
 
-  // Function to compress image using Expo ImageManipulator
+  // Compresses image using Expo ImageManipulator
   const compressImage = async (uri: string): Promise<string> => {
     try {
       const compressedImage = await ImageManipulator.manipulateAsync(
         uri,
-        [{ resize: { width: 1024 } }], // Resize to 1024px width
+        [{ resize: { width: 1024 } }],
         { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
       );
       return compressedImage.uri;
@@ -106,7 +105,7 @@ function ProfileContent() {
     }
     setIsUploading(true);
     try {
-      // Compress the image before uploading
+      // Compresses the image before uploading
       const compressedImageUri = await compressImage(selectedImage);
       // Convert the compressed image URI to Blob
       const blob = await uriToBlob(compressedImageUri);
