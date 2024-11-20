@@ -91,6 +91,7 @@ function ProfileContent() {
     }
   };
 
+  // Handles image upload to Firebase Storage, tracks progress, and saves artwork details in Firestore.
   const handleUpload = async () => {
     if (!selectedImage || !title || !description) {
       Alert.alert(
@@ -180,6 +181,8 @@ function ProfileContent() {
     }
   };
 
+  // Saves updated profile information in Firestore,
+  // including compressed profile images if needed.
   const saveProfile = async ({
     username,
     bio,
@@ -263,6 +266,7 @@ function ProfileContent() {
     setDescription("");
   };
 
+  // Allows the user to select an image from their device's library with optional editing.
   const pickImageFromLibrary = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {

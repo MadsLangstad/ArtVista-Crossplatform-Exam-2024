@@ -28,6 +28,8 @@ export default function Gallery() {
   // Debounced search query to reduce unnecessary API calls
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
+  // Fetches artworks from the API with optional refresh or search query handling.
+  // Ensures duplicate IDs are removed and updates the state with filtered results.
   const fetchArtworksData = async (refresh = false, query = "") => {
     try {
       if (refresh) {
@@ -72,6 +74,8 @@ export default function Gallery() {
     fetchArtworksData();
   }, []);
 
+  // Refetches artworks when the debounced search query changes,
+  // applying the query to filter results.
   useEffect(() => {
     fetchArtworksData(true, debouncedSearchQuery);
   }, [debouncedSearchQuery]);
@@ -90,6 +94,7 @@ export default function Gallery() {
     />
   );
 
+  // Interpolates the header's vertical translation to achieve a scroll-based collapsing effect.
   const headerTranslateY = scrollY.interpolate({
     inputRange: [0, 100],
     outputRange: [0, -200],

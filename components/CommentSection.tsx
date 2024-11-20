@@ -29,6 +29,8 @@ const CommentSection: React.FC<
   const [editingText, setEditingText] = useState("");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
+  // Prompts the user with a confirmation before deleting a comment.
+  // Updates the comments state after deletion.
   const handleDelete = async (commentId: string, artworkId: string) => {
     Alert.alert(
       "Delete Comment",
@@ -53,6 +55,7 @@ const CommentSection: React.FC<
     );
   };
 
+  // Handles editing a comment by updating its text in the database and state, then resetting edit mode.
   const handleEdit = async (id: string, artworkId: string) => {
     try {
       await editComment(artworkId, id, editingText);
@@ -68,6 +71,7 @@ const CommentSection: React.FC<
     }
   };
 
+  // Detects when the user scrolls near the bottom of the comment list and fetches more comments.
   const onScrollEnd = async ({ nativeEvent }: { nativeEvent: any }) => {
     if (isCloseToBottom(nativeEvent)) {
       setIsLoadingMore(true);
@@ -76,6 +80,7 @@ const CommentSection: React.FC<
     }
   };
 
+  // Utility function to determine if the scroll position is close to the bottom of the list.
   const isCloseToBottom = ({
     layoutMeasurement,
     contentOffset,
@@ -150,6 +155,7 @@ const CommentSection: React.FC<
   );
 };
 
+// Provides edit and delete buttons for comments owned by the current user. Updates state when actions are triggered.
 const CommentActions = ({
   comment,
   setEditingComment,
@@ -188,6 +194,7 @@ const CommentActions = ({
   </View>
 );
 
+// Renders a text input with "Save" and "Cancel" options for editing a comment. Handles state and invokes save logic.
 const EditCommentInput = ({
   editingText,
   setEditingText,
@@ -238,6 +245,7 @@ const EditCommentInput = ({
   </View>
 );
 
+// Displays an input field and button to allow users to add new comments. Updates the state on submission.
 const CommentInput = ({
   commentText,
   setCommentText,

@@ -1,5 +1,0 @@
-Implementere Google login/signup
-implementere average rating på bilder.
-Legge til kommentarer på kompleks kode
-User feeback.
-Featured artists.

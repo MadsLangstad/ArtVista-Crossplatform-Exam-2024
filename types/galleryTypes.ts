@@ -6,6 +6,8 @@ export interface ArtworkItemProps {
   commentsCount: number;
   description: string;
   abstract: string;
+  upvote: number;
+  downvote: number;
 }
 
 export interface ArtworkItemComponentProps {

@@ -16,6 +16,7 @@ import {
   getDoc,
   setDoc,
   deleteDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { ArtworkItemComponentProps } from "@/types/galleryTypes";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,9 +26,13 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
   const [imageLoading, setImageLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(item.likes || 0);
+  const [upvoteCount, setUpvoteCount] = useState(item.upvote || 0);
+  const [downvoteCount, setDownvoteCount] = useState(item.downvote || 0);
   const [commentsCount, setCommentsCount] = useState(item.commentsCount || 0);
+
   const { user } = useAuth();
 
+  // Fetches initial counts (likes, comments, votes) for the artwork and subscribes to real-time updates for any changes.
   useEffect(() => {
     const fetchCounts = async () => {
       try {
@@ -38,6 +43,9 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
           const data = artworkDoc.data();
           setLikesCount(data.likes || 0);
           setCommentsCount(data.commentsCount || 0);
+          setUpvoteCount(data.upvote || 0);
+          setDownvoteCount(data.downvote || 0);
+          console.log("Artwork data fetched:", data);
         }
 
         if (user) {
@@ -57,8 +65,26 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
     };
 
     fetchCounts();
+
+    const unsubscribe = onSnapshot(
+      doc(firestore, "artworks", item.id),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setLikesCount(data.likes || 0);
+          setCommentsCount(data.commentsCount || 0);
+          setUpvoteCount(data.upvote || 0);
+          setDownvoteCount(data.downvote || 0);
+          console.log("Real-time artwork data fetched:", data);
+        }
+      }
+    );
+
+    return () => unsubscribe();
   }, [item.id, user]);
 
+  // Toggles the like status for an artwork,
+  // updating Firestore and maintaining UI state consistency.
   const toggleLike = async () => {
     if (!user) {
       Alert.alert("Authentication Required", "Please log in to like artworks.");
@@ -72,12 +98,16 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
       if (!isLiked) {
         await setDoc(userLikeRef, { liked: true });
         await updateDoc(artworkRef, { likes: increment(1) });
-        setLikesCount(likesCount + 1);
+
+        const updatedArtwork = await getDoc(artworkRef);
+        setLikesCount(updatedArtwork.data()?.likes || 0);
         setIsLiked(true);
       } else {
         await deleteDoc(userLikeRef);
         await updateDoc(artworkRef, { likes: increment(-1) });
-        setLikesCount(likesCount - 1);
+
+        const updatedArtwork = await getDoc(artworkRef);
+        setLikesCount(updatedArtwork.data()?.likes || 0);
         setIsLiked(false);
       }
     } catch (error) {
@@ -120,7 +150,7 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
           onLoad={() => setImageLoading(false)}
           style={{ position: "absolute", width: "100%", height: "100%" }}
         />
-        {/* Overlay Container */}
+
         <View className="absolute bottom-0 rounded-b-lg inset-x-0 bg-black opacity-75 px-2 flex-row justify-between items-center">
           <View className="flex-1">
             <Text className="text-lg font-bold text-white">{item.title}</Text>
@@ -131,9 +161,29 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
               {item.description}
             </Text>
           </View>
-          {/* Icons Container */}
+
           <View className="flex-row items-center space-x-4">
-            {/* Heart Icon with Like Count */}
+            <View>
+              <MaterialCommunityIcons
+                name="thumb-up"
+                size={24}
+                color="#007BFF"
+              />
+              {upvoteCount > 0 && (
+                <View
+                  className="absolute -top-3 right-0 bg-red-500 rounded-full flex items-center justify-center"
+                  style={{
+                    width: 18,
+                    height: 18,
+                  }}
+                >
+                  <Text className="text-xs text-white text-center">
+                    {upvoteCount}
+                  </Text>
+                </View>
+              )}
+            </View>
+
             <TouchableOpacity onPress={toggleLike} className="relative p-1">
               <MaterialCommunityIcons
                 name={isLiked ? "heart" : "heart-outline"}
@@ -142,11 +192,10 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
               />
               {likesCount > 0 && (
                 <View
-                  className="absolute -top-1 -right-1 bg-red-500 rounded-full"
+                  className="absolute -top-2 right-0 bg-red-500 rounded-full flex items-center justify-center"
                   style={{
-                    minWidth: 18,
-                    minHeight: 18,
-                    paddingHorizontal: 4,
+                    width: 18,
+                    height: 18,
                   }}
                 >
                   <Text className="text-xs text-white text-center">
@@ -155,23 +204,22 @@ const ArtworkItem = memo(({ item, handlePress }: ArtworkItemComponentProps) => {
                 </View>
               )}
             </TouchableOpacity>
-            {/* Comment Icon with Comment Count */}
+
             <TouchableOpacity
               onPress={handleCommentPress}
               className="relative p-1"
             >
               <MaterialCommunityIcons
-                name="comment-outline"
+                name="comment"
                 size={24}
-                color="#FFFFFF"
+                color="#007BFF"
               />
               {commentsCount > 0 && (
                 <View
-                  className="absolute -top-1 -right-1 bg-blue-500 rounded-full"
+                  className="absolute -top-2 right-0 bg-red-500 rounded-full flex items-center justify-center"
                   style={{
-                    minWidth: 18,
-                    minHeight: 18,
-                    paddingHorizontal: 4,
+                    width: 18,
+                    height: 18,
                   }}
                 >
                   <Text className="text-xs text-white text-center">

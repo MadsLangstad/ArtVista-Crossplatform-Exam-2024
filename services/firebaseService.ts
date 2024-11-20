@@ -25,6 +25,7 @@ import {
 
 export const firestore = getFirestore(app);
 
+// Fetches Artworks from Firestore
 export const fetchArtworks = async (
   referenceDoc: DocumentSnapshot | null = null,
   loadOlderItems: boolean = false,
@@ -68,6 +69,7 @@ export const fetchArtworks = async (
   }
 };
 
+// Fetch Artwork by ID with Comments from Firestore (for Details Page) - Async Function
 export const fetchArtworkById = async (id: string) => {
   try {
     const docRef = doc(firestore, "artworks", id);
@@ -97,6 +99,7 @@ export const fetchArtworkById = async (id: string) => {
   }
 };
 
+// Upload Artwork Image to Firebase Storage
 export const uploadArtworkImage = async (file: Blob, fileName: string) => {
   try {
     const storageRef = ref(storage, `artwork-images/${fileName}`);
@@ -129,6 +132,7 @@ export const uploadArtworkImage = async (file: Blob, fileName: string) => {
   }
 };
 
+// Vote on Artwork (Upvote/Downvote)
 export const voteArtwork = async (
   artworkId: string,
   voteType: "upvote" | "downvote"
@@ -145,12 +149,14 @@ export const voteArtwork = async (
   }
 };
 
+// Add Artwork Details to Firestore
 export const addArtworkDetails = async (artworkDetails: ArtworkDetails) => {
   try {
     const docRef = await addDoc(collection(firestore, "artworks"), {
       ...artworkDetails,
       upvotes: 0,
       downvotes: 0,
+      commentsCount: 0,
     });
     return docRef.id;
   } catch (error) {
@@ -158,7 +164,7 @@ export const addArtworkDetails = async (artworkDetails: ArtworkDetails) => {
   }
 };
 
-// Comments
+// Fetch Comments for Artwork
 export const fetchComments = async (
   artworkId: string,
   lastComment?: DocumentSnapshot,
@@ -205,6 +211,7 @@ export const fetchComments = async (
   }
 };
 
+// Add Comment to Artwork
 export const addComment = async (
   artworkId: string,
   text: string,
@@ -229,6 +236,12 @@ export const addComment = async (
       collection(firestore, `artworks/${artworkId}/comments`),
       comment
     );
+
+    const artworkRef = doc(firestore, "artworks", artworkId);
+    await updateDoc(artworkRef, {
+      commentsCount: increment(1),
+    });
+
     return docRef.id;
   } catch (error) {
     console.error("Error adding comment:", error);
@@ -236,6 +249,7 @@ export const addComment = async (
   }
 };
 
+// Edit Comment
 export const editComment = async (
   artworkId: string,
   commentId: string,
@@ -258,6 +272,7 @@ export const editComment = async (
   }
 };
 
+// Delete Comment from Artwork
 export const deleteComment = async (artworkId: string, commentId: string) => {
   try {
     const commentRef = doc(
@@ -295,6 +310,9 @@ const sampleArtwork = {
     location: "Museum of Modern Art",
     date: new Date().toISOString(),
   },
+  upvotes: 0,
+  downvotes: 0,
+  commentsCount: 0,
 };
 
 const sampleUser = {
@@ -315,6 +333,7 @@ const sampleComment = {
   userId: "userId123",
   text: "This is a beautiful piece of art!",
   timestamp: new Date().toISOString(),
+  author: "Elon Musk",
 };
 
 const sampleVote = {
@@ -324,6 +343,7 @@ const sampleVote = {
   timestamp: new Date().toISOString(),
 };
 
+// Initialize Firestore Data
 export async function initializeFirestoreData() {
   try {
     const artworksCollection = collection(firestore, "artworks");
@@ -335,12 +355,15 @@ export async function initializeFirestoreData() {
       return;
     }
 
-    await addDoc(artworksCollection, sampleArtwork);
+    const artworkDocRef = await addDoc(artworksCollection, sampleArtwork);
 
     const usersCollection = collection(firestore, "users");
     await addDoc(usersCollection, sampleUser);
 
-    const commentsCollection = collection(firestore, "comments");
+    const commentsCollection = collection(
+      firestore,
+      `artworks/${artworkDocRef.id}/comments`
+    );
     await addDoc(commentsCollection, sampleComment);
 
     const votesCollection = collection(firestore, "votes");

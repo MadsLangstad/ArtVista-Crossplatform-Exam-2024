@@ -51,6 +51,8 @@ function DetailContent() {
   const [loading, setLoading] = useState(true);
   const [imageLoading, setImageLoading] = useState(true);
 
+  // Fetches initial comments for the artwork by ID,
+  // formatting them for display and handling pagination.
   useEffect(() => {
     if (id) {
       const fetchInitialComments = async () => {
@@ -73,6 +75,7 @@ function DetailContent() {
     }
   }, [id]);
 
+  // Subscribes to live updates for artwork details and updates the UI state dynamically.
   useEffect(() => {
     if (id) {
       const docRef = doc(firestore, "artworks", Array.isArray(id) ? id[0] : id);
@@ -101,6 +104,7 @@ function DetailContent() {
     }
   }, [id]);
 
+  // Manages voting logic, ensuring users cannot vote the same way twice and handling Firebase updates for votes.
   const handleVote = async (type: "upvote" | "downvote") => {
     if (!user || !id) return;
 
@@ -199,6 +203,7 @@ function DetailContent() {
     );
   }
 
+  // Handles comment pagination by fetching the next batch of comments based on the last visible comment.
   function fetchMoreComments(): Promise<void> {
     return new Promise(async (resolve) => {
       if (lastComment) {
@@ -228,8 +233,8 @@ function DetailContent() {
 
   return (
     <View className="flex-1 bg-white dark:bg-black">
-      <View className="flex-1 p-4">
-        <View className="relative w-full h-80 mb-4 rounded-lg">
+      <View className="flex-1 px-4 py-4">
+        <View className="relative w-full h-48 sm:h-64 md:h-72 lg:h-80 mb-4 rounded-lg">
           {imageLoading && (
             <View className="absolute top-0 left-0 right-0 bottom-0 justify-center items-center">
               <ActivityIndicator size="large" color="#E91E63" />
@@ -237,19 +242,19 @@ function DetailContent() {
           )}
           <Image
             source={{ uri: artworkDetails.imageUrl }}
-            className="w-full h-full rounded-lg border-2 border-[#E61E63]"
+            className="w-full h-full rounded-lg object-contain border-2 border-[#E91E63]"
             resizeMode="cover"
             onLoad={() => setImageLoading(false)}
           />
         </View>
 
-        <Text className="text-black dark:text-white text-3xl font-bold mb-4">
+        <Text className="text-black dark:text-white text-2xl md:text-3xl font-bold mb-4">
           {artworkDetails.title}
         </Text>
-        <Text className="text-gray-800 dark:text-gray-400 text-lg mb-4">
+        <Text className="text-gray-800 dark:text-gray-400 text-md md:text-lg mb-4">
           By {artworkDetails.artist} ({artworkDetails.year})
         </Text>
-        <Text className="text-black dark:text-white text-base mb-4">
+        <Text className="text-black dark:text-white text-sm md:text-base mb-4">
           {artworkDetails.description}
         </Text>
 
